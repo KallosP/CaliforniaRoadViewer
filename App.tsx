@@ -3,6 +3,7 @@ import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import { StyleSheet, View } from 'react-native';
 
 export default function App() {
+  // Test
   return (
     <View style={styles.container}>
       {
