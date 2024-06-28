@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
-import { StyleSheet, View, Text, Button } from 'react-native';
+import { StyleSheet, View, Modal, Image, Text, Button } from 'react-native';
 
 const INITIAL_REGION = {
   latitude: 37.33,
@@ -68,8 +68,24 @@ type CCTV = {
 //       ALWAYS make custom styles for otherwise default components (e.g. buttons)
 export default function App() {
 
-  // Specifying that cctvLocations is an array of tuples (of type number)
-  const [cctvLocations, setCctvLocations] = useState<[number, number][]>([]);
+  // Manages modal state (for when user clicks marker)
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  // State fore storing all cctvs
+  const [cams, setCams] = useState<CCTV[]>([]);
+  // State for tracking currently selected cctv (for displaying corresponding cctv image in modal)
+  const [selectedCCTV, setSelectedCCTV] = useState<CCTV>(); 
+
+  /*
+    TODO: 
+          - Focus on district 1, get the markers, modal, etc looking/working well/as finished product,
+          then once done, add rest of districts
+
+          - Add current cam of location
+          - Add rest of districts
+          - Prioritize clean UI
+          - Decide what the modal should look like/include 
+          - Look into dynamic marker display for performance if needed??
+  */
 
   // Data from district 1
   useEffect(() => {
@@ -77,18 +93,15 @@ export default function App() {
     fetch('https://cwwp2.dot.ca.gov/data/d1/cctv/cctvStatusD01.json')
       // Convert response into json
       .then((response) => response.json())
-      // Convert json object to a string and prettyprint
+      // Can access all properties of json object at this point aka all data related to cctv's
       .then((json) => {
-        //setCctvLocations()
-        // Run through all cctv's and store their lat and lng in d1CamLocations
-        const d1CamLocations = json.data.map((cam: CCTV) => [
-          // Convert lat lng to floats (in that order)
-          parseFloat(cam.cctv.location.latitude),
-          parseFloat(cam.cctv.location.longitude)
-          //console.log("{", lat, ", ", lng, "}")
-        ]);
-        // Set these locations/update cctvLocations
-        setCctvLocations(d1CamLocations)
+        // Print data to console
+        //console.log(JSON.stringify(json.data, null, 2))
+
+        // Store all cameras from json object into CCTV array d1Cams
+        const d1Cams: CCTV[] = json.data.map((cam: CCTV) => cam);
+        // Set/update cams to hold all camera data
+        setCams(d1Cams)
       })
       // Catch any fetching error
       .catch((error) => {
@@ -97,31 +110,58 @@ export default function App() {
       })
   }, []) // Only fetch data once on app load
 
+  // Custom handler for pressing a marker
+  const handleMarkerPress = (cctv: CCTV) => {
+    setSelectedCCTV(cctv)
+    setIsModalVisible(true)
+  }
+
   return (
     <View style={styles.container}>
-      {
-        // Sets Google Maps as the map provider and initial region
-      }
-      {
-        <MapView
-          style={styles.map}
-          provider={PROVIDER_GOOGLE}
-          initialRegion={INITIAL_REGION}
-        // TODO: figure out why not displaying user location
-        //showsUserLocation
-        //showsMyLocationButton
-        >
-          {
-          // Run through cctvLocations and render a marker for each camera
-          cctvLocations.map((currCam, index) => (
-            <Marker
-              key={index}
-              coordinate={{latitude: currCam[0], longitude: currCam[1]}}
-              onPress={() => console.log("Marker pressed")}
-            />
-          ))}
-        </MapView>
-      }
+      { /* Sets Google Maps as the map provider and initial region */ }
+      <MapView
+        style={styles.map}
+        provider={PROVIDER_GOOGLE}
+        initialRegion={INITIAL_REGION}
+      // TODO: figure out why not displaying user location
+      //showsUserLocation
+      //showsMyLocationButton
+      >
+        {
+        // Run through all cameras and render a marker for each one's location
+        cams.map((currCam, index) => (
+          <Marker
+            key={index}
+            coordinate={{latitude: parseFloat(currCam.cctv.location.latitude), longitude: parseFloat(currCam.cctv.location.longitude)}}
+            onPress={() => handleMarkerPress(currCam)}
+          />
+        ))}
+      </MapView>
+
+      <Modal 
+        // Manage modal visibility with state
+        visible={isModalVisible}
+        // Dismisses modal when user presses back on Android or gestures on iOS
+        onRequestClose={() => setIsModalVisible(false)}
+        // Animation of modal
+        animationType='fade'
+      >
+        {/* The layout of the modal */}
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          { // Only render the modal if there's a selected cctv/selcetedCCTV is not null (using boolean logic)
+          selectedCCTV && (
+            <View>
+              {/* Display the selected cctv's image */}
+              <Image
+                source={{ uri: selectedCCTV.cctv.imageData.static.currentImageURL }}
+                style={{ width: 400, height: 400 }}
+              />
+              <Button title="Close" onPress={() => setIsModalVisible(false)} />
+            </View>
+          )}
+        </View>
+      </Modal>
+      
     </View>
   );
 }
