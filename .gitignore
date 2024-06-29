@@ -33,3 +33,11 @@ yarn-error.*
 
 # typescript
 *.tsbuildinfo
+
+# Android Native Directory (for running on physical device)
+android
+
+# Environment Variables
+.env
+
+app.json
