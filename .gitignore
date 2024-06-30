@@ -40,4 +40,5 @@ android
 # Environment Variables
 .env
 
+# DO NOT ADD app.json
 app.json

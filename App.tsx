@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { useVideoPlayer, VideoView } from 'expo-video';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { StyleSheet, View, Modal, Image, Text, Button } from 'react-native';
 
@@ -9,11 +10,6 @@ const INITIAL_REGION = {
   longitudeDelta: 2,
 }
 
-// Manages the style of the various components in app
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-  map: { width: '100%', height: '100%' },
-});
 
 // Specifying the layout of the cctv data for type checking
 type CCTV = {
@@ -74,6 +70,8 @@ export default function App() {
   const [cams, setCams] = useState<CCTV[]>([]);
   // State for tracking currently selected cctv (for displaying corresponding cctv image in modal)
   const [selectedCCTV, setSelectedCCTV] = useState<CCTV>(); 
+  const [videoSource, setVideoSource] = useState<string>("");
+  const ref = useRef(null);
 
   /*
     TODO: 
@@ -90,7 +88,7 @@ export default function App() {
   // Data from district 1
   useEffect(() => {
     // Fetch cctv data
-    fetch('https://cwwp2.dot.ca.gov/data/d1/cctv/cctvStatusD01.json')
+    fetch('https://cwwp2.dot.ca.gov/data/d7/cctv/cctvStatusD07.json')
       // Convert response into json
       .then((response) => response.json())
       // Can access all properties of json object at this point aka all data related to cctv's
@@ -113,8 +111,22 @@ export default function App() {
   // Custom handler for pressing a marker
   const handleMarkerPress = (cctv: CCTV) => {
     setSelectedCCTV(cctv)
+    // Set video source to current cctv
+    var currCam = cctv.cctv.imageData.streamingVideoURL
+    if(currCam == ""){
+      alert("Video is not available")
+    }
+    else{
+      setVideoSource(currCam)
+    }
     setIsModalVisible(true)
   }
+
+  const player = useVideoPlayer(videoSource, player => {
+    player.loop = true;
+    player.isLive = true;
+    player.play();
+  });
 
   return (
     <View style={styles.container}>
@@ -147,16 +159,25 @@ export default function App() {
         animationType='fade'
       >
         {/* The layout of the modal */}
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <View style={styles.modal}>
           { // Only render the modal if there's a selected cctv/selcetedCCTV is not null (using boolean logic)
           selectedCCTV && (
             <View>
               {/* Display the selected cctv's image */}
-              <Image
-                source={{ uri: selectedCCTV.cctv.imageData.static.currentImageURL }}
+              {/*<Image
+                source={{ uri: selectedCCTV.cctv.imageData.streamingVideoURL}}
                 style={{ width: 400, height: 400 }}
+              />*/}
+              <VideoView
+                ref={ref}
+                style={styles.video}
+                player={player}
+                allowsFullscreen
+                allowsPictureInPicture
               />
+
               <Button title="Close" onPress={() => setIsModalVisible(false)} />
+
             </View>
           )}
         </View>
@@ -165,3 +186,17 @@ export default function App() {
     </View>
   );
 }
+
+// Manages the style of the various components in app
+const styles = StyleSheet.create({
+  container: { flex: 1 },
+  map: { width: '100%', height: '100%' },
+  modal: {flex: 1, justifyContent: 'center', alignItems: 'center'},
+  video: {
+    width: 350,
+    height: 275,
+  },
+  controlsContainer: {
+    padding: 10,
+  },
+});
