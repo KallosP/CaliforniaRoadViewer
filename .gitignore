@@ -40,5 +40,5 @@ android
 # Environment Variables
 .env
 
-# DO NOT ADD app.json
+# ALWAYS add app.json here whenever pushing to ignore API key
 app.json

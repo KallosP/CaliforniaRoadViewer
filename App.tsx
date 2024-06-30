@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useVideoPlayer, VideoView } from 'expo-video';
+import { Video } from 'expo-av';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { StyleSheet, View, Modal, Image, Text, Button } from 'react-native';
 
@@ -71,7 +71,7 @@ export default function App() {
   // State for tracking currently selected cctv (for displaying corresponding cctv image in modal)
   const [selectedCCTV, setSelectedCCTV] = useState<CCTV>(); 
   const [videoSource, setVideoSource] = useState<string>("");
-  const ref = useRef(null);
+  const videoRef = useRef(null);
 
   /*
     TODO: 
@@ -110,11 +110,13 @@ export default function App() {
 
   // Custom handler for pressing a marker
   const handleMarkerPress = (cctv: CCTV) => {
+    // Set selectedCCTV to current cctv
     setSelectedCCTV(cctv)
     // Set video source to current cctv
     var currCam = cctv.cctv.imageData.streamingVideoURL
     if(currCam == ""){
-      alert("Video is not available")
+      console.log("Video is not available for camera: ", cctv.cctv.index)
+      setVideoSource("")
     }
     else{
       setVideoSource(currCam)
@@ -122,11 +124,16 @@ export default function App() {
     setIsModalVisible(true)
   }
 
-  const player = useVideoPlayer(videoSource, player => {
+  const handleModalClose = () => {
+    setIsModalVisible(false)
+  }
+
+  /*const player = useVideoPlayer(videoSource, player => {
+    console.log('using player')
     player.loop = true;
     player.isLive = true;
     player.play();
-  });
+  });*/
 
   return (
     <View style={styles.container}>
@@ -154,7 +161,7 @@ export default function App() {
         // Manage modal visibility with state
         visible={isModalVisible}
         // Dismisses modal when user presses back on Android or gestures on iOS
-        onRequestClose={() => setIsModalVisible(false)}
+        onRequestClose={handleModalClose}
         // Animation of modal
         animationType='fade'
       >
@@ -163,21 +170,39 @@ export default function App() {
           { // Only render the modal if there's a selected cctv/selcetedCCTV is not null (using boolean logic)
           selectedCCTV && (
             <View>
-              {/* Display the selected cctv's image */}
-              {/*<Image
-                source={{ uri: selectedCCTV.cctv.imageData.streamingVideoURL}}
-                style={{ width: 400, height: 400 }}
-              />*/}
-              <VideoView
-                ref={ref}
-                style={styles.video}
-                player={player}
-                allowsFullscreen
-                allowsPictureInPicture
-              />
+              <>
+                {console.log(videoSource)}
+              </>
+              
+              {videoSource !== "" ? (
+                  /* Display live video if available */
+                  <View>
+                   <Video
+                      ref={videoRef}
+                      source={{ uri: videoSource }}
+                      style={styles.video}
+                      // TODO: change later to custom controls?
+                      useNativeControls={true}
+                      shouldPlay={true}
+                      isLooping={true}
+                    />
 
+                    <Text>Displaying Video</Text>
+                  </View>
+                ) : (
+                  /* Display the selected cctv's image if video is not available */
+                  <View>
+                    <Image
+                      source={{ uri: selectedCCTV.cctv.imageData.static.currentImageURL}}
+                      style={styles.video}
+                    />
+                    <Text>No live video is available for this camera, displaying most recent image instead.</Text>
+                  </View>
+                )
+              
+              }
               <Button title="Close" onPress={() => setIsModalVisible(false)} />
-
+            
             </View>
           )}
         </View>
