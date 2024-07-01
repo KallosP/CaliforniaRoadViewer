@@ -1,6 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Video } from 'expo-av';
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import /*MapView,*/ { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import MapView from "react-native-map-clustering";
+
+
 import { StyleSheet, View, Modal, Image, Text, Button } from 'react-native';
 
 const INITIAL_REGION = {
@@ -9,7 +12,6 @@ const INITIAL_REGION = {
   latitudeDelta: 2,
   longitudeDelta: 2,
 }
-
 
 // Specifying the layout of the cctv data for type checking
 type CCTV = {
@@ -75,20 +77,51 @@ export default function App() {
 
   /*
     TODO: 
-          - Focus on district 1, get the markers, modal, etc looking/working well/as finished product,
-          then once done, add rest of districts
-
-          - Add current cam of location
-          - Add rest of districts
-          - Prioritize clean UI
-          - Decide what the modal should look like/include 
-          - Look into dynamic marker display for performance if needed??
+          - IMPROVE MODAL RENDER PERFORMANCE, takes too long to load (because of large cams array)
+          - For live feeds that are in service but don't play, detect it somehow and show current image instead
+            (go to fresno (districty 6), a lot of them are there; look into making the thumbnail of videos 
+            default to current image? possible?)
+          - Decide on using modal or separate page for cam info
+          - Decide on info to put under cam video/image
+          - Implement highway search for highway conditions
+          - Clean up UI
+          - ...
   */
 
-  // Data from district 1
+  // Storing camera data from all districts in CA
   useEffect(() => {
+
+    const camUrls = [
+      'https://cwwp2.dot.ca.gov/data/d1/cctv/cctvStatusD01.json',
+      'https://cwwp2.dot.ca.gov/data/d2/cctv/cctvStatusD02.json',
+      'https://cwwp2.dot.ca.gov/data/d3/cctv/cctvStatusD03.json',
+      'https://cwwp2.dot.ca.gov/data/d4/cctv/cctvStatusD04.json',
+      'https://cwwp2.dot.ca.gov/data/d5/cctv/cctvStatusD05.json',
+      'https://cwwp2.dot.ca.gov/data/d6/cctv/cctvStatusD06.json',
+      'https://cwwp2.dot.ca.gov/data/d7/cctv/cctvStatusD07.json',
+      'https://cwwp2.dot.ca.gov/data/d8/cctv/cctvStatusD08.json',
+      'https://cwwp2.dot.ca.gov/data/d9/cctv/cctvStatusD09.json',
+      'https://cwwp2.dot.ca.gov/data/d10/cctv/cctvStatusD10.json',
+      'https://cwwp2.dot.ca.gov/data/d11/cctv/cctvStatusD11.json',
+      'https://cwwp2.dot.ca.gov/data/d12/cctv/cctvStatusD12.json',
+    ];
+
+    const fetchAllData = async () => {
+      try {
+        const responses = await Promise.all(camUrls.map(url => fetch(url)));
+        const dataPromises = responses.map(response => response.json());
+        const jsonData = await Promise.all(dataPromises);
+        const allCams = jsonData.flatMap(json => json.data.map((cam: CCTV) => cam));
+        setCams(allCams);
+        //console.log(allCams.length);
+      } catch (error) {
+        alert("Something went wrong fetching camera data...");
+        console.error(error);
+      }
+    };
+
     // Fetch cctv data
-    fetch('https://cwwp2.dot.ca.gov/data/d7/cctv/cctvStatusD07.json')
+    /*fetch('https://cwwp2.dot.ca.gov/data/d1/cctv/cctvStatusD01.json')
       // Convert response into json
       .then((response) => response.json())
       // Can access all properties of json object at this point aka all data related to cctv's
@@ -105,7 +138,8 @@ export default function App() {
       .catch((error) => {
         alert("Something went wrong...")
         console.error(error)
-      })
+      })*/
+     fetchAllData();
   }, []) // Only fetch data once on app load
 
   // Custom handler for pressing a marker
@@ -115,7 +149,7 @@ export default function App() {
     // Set video source to current cctv
     var currCam = cctv.cctv.imageData.streamingVideoURL
     if(currCam == ""){
-      console.log("Video is not available for camera: ", cctv.cctv.index)
+      //console.log("Video is not available for camera: ", cctv.cctv.index)
       setVideoSource("")
     }
     else{
@@ -142,20 +176,25 @@ export default function App() {
         style={styles.map}
         provider={PROVIDER_GOOGLE}
         initialRegion={INITIAL_REGION}
+        radius={110}
+        minPoints={4}
+        extent={812}
       // TODO: figure out why not displaying user location
       //showsUserLocation
       //showsMyLocationButton
       >
         {
         // Run through all cameras and render a marker for each one's location
-        cams.map((currCam, index) => (
+        cams.flatMap((currCam, index) => (
           <Marker
             key={index}
             coordinate={{latitude: parseFloat(currCam.cctv.location.latitude), longitude: parseFloat(currCam.cctv.location.longitude)}}
             onPress={() => handleMarkerPress(currCam)}
+            tracksViewChanges={false}
           />
         ))}
       </MapView>
+      
 
       <Modal 
         // Manage modal visibility with state
@@ -171,7 +210,7 @@ export default function App() {
           selectedCCTV && (
             <View>
               <>
-                {console.log(videoSource)}
+                {/*console.log(selectedCCTV.cctv.index)*/}
               </>
               
               {videoSource !== "" ? (
@@ -201,7 +240,7 @@ export default function App() {
                 )
               
               }
-              <Button title="Close" onPress={() => setIsModalVisible(false)} />
+              <Button title="Close" onPress={handleModalClose} />
             
             </View>
           )}
