@@ -24,7 +24,12 @@ export default function Layout() {
             <Drawer.Screen
                 name="cctv-details"
                 options={{
-                    drawerLabel: 'User',
+                    title: '',
+                }}
+            />
+            <Drawer.Screen
+                name="lcs-details"
+                options={{
                     title: '',
                 }}
             />

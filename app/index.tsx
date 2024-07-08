@@ -18,6 +18,25 @@ function setStatusBar (){
   StatusBar.setBarStyle('light-content');
 }
 
+async function fetchAllData<T>(urlArr: string[]) {
+  try {
+    // Run through each url in current array and fetch data; make a promise it will return
+    const responses = await Promise.all(urlArr.map(url => fetch(url)));
+    // Parse responses into a json object
+    const dataPromises = responses.map(response => response.json());
+    // Await all json promises to resolve and store in jsonData object
+    const jsonData = await Promise.all(dataPromises);
+    // Combine all json data into one array of the url's type (i.e. CCTV, LCS, etc)
+    const allUrlData = jsonData.flatMap(json => json.data.map((item: T) => item));
+    return allUrlData;
+    //console.log(allCams.length);
+  } catch (error) {
+    alert("Something went wrong fetching data...");
+    console.error(error);
+    return [];
+  }
+}
+
 // NOTE: don't rely on default component styles, will look different for every platform,
 //       ALWAYS make custom styles for otherwise default components (e.g. buttons)
 export default function HomeScreen() {
@@ -47,53 +66,55 @@ export default function HomeScreen() {
   // Storing data from all districts in CA
   useEffect(() => {
 
-    console.log('testing')
-    const camUrls = [
-      'https://cwwp2.dot.ca.gov/data/d1/cctv/cctvStatusD01.json',
-      'https://cwwp2.dot.ca.gov/data/d2/cctv/cctvStatusD02.json',
-      'https://cwwp2.dot.ca.gov/data/d3/cctv/cctvStatusD03.json',
-      'https://cwwp2.dot.ca.gov/data/d4/cctv/cctvStatusD04.json',
-      'https://cwwp2.dot.ca.gov/data/d5/cctv/cctvStatusD05.json',
-      'https://cwwp2.dot.ca.gov/data/d6/cctv/cctvStatusD06.json',
-      'https://cwwp2.dot.ca.gov/data/d7/cctv/cctvStatusD07.json',
-      'https://cwwp2.dot.ca.gov/data/d8/cctv/cctvStatusD08.json',
-      'https://cwwp2.dot.ca.gov/data/d9/cctv/cctvStatusD09.json',
-      'https://cwwp2.dot.ca.gov/data/d10/cctv/cctvStatusD10.json',
-      'https://cwwp2.dot.ca.gov/data/d11/cctv/cctvStatusD11.json',
-      'https://cwwp2.dot.ca.gov/data/d12/cctv/cctvStatusD12.json',
-    ];
+    async function fetchData () {
+      console.log('testing')
+      const camUrls = [
+        'https://cwwp2.dot.ca.gov/data/d1/cctv/cctvStatusD01.json',
+        'https://cwwp2.dot.ca.gov/data/d2/cctv/cctvStatusD02.json',
+        'https://cwwp2.dot.ca.gov/data/d3/cctv/cctvStatusD03.json',
+        'https://cwwp2.dot.ca.gov/data/d4/cctv/cctvStatusD04.json',
+        'https://cwwp2.dot.ca.gov/data/d5/cctv/cctvStatusD05.json',
+        'https://cwwp2.dot.ca.gov/data/d6/cctv/cctvStatusD06.json',
+        'https://cwwp2.dot.ca.gov/data/d7/cctv/cctvStatusD07.json',
+        'https://cwwp2.dot.ca.gov/data/d8/cctv/cctvStatusD08.json',
+        'https://cwwp2.dot.ca.gov/data/d9/cctv/cctvStatusD09.json',
+        'https://cwwp2.dot.ca.gov/data/d10/cctv/cctvStatusD10.json',
+        'https://cwwp2.dot.ca.gov/data/d11/cctv/cctvStatusD11.json',
+        'https://cwwp2.dot.ca.gov/data/d12/cctv/cctvStatusD12.json',
+      ];
 
-    // Lane closures TODO
-    const lcsUrls = [
-      'https://cwwp2.dot.ca.gov/data/d1/lcs/lcsStatusD01.json'
-    ]
+      // Lane closures 
+      const lcsUrls = [
+        'https://cwwp2.dot.ca.gov/data/d1/lcs/lcsStatusD01.json',
+        'https://cwwp2.dot.ca.gov/data/d2/lcs/lcsStatusD02.json',
+        'https://cwwp2.dot.ca.gov/data/d3/lcs/lcsStatusD03.json',
+        'https://cwwp2.dot.ca.gov/data/d4/lcs/lcsStatusD04.json',
+        'https://cwwp2.dot.ca.gov/data/d5/lcs/lcsStatusD05.json',
+        'https://cwwp2.dot.ca.gov/data/d6/lcs/lcsStatusD06.json',
+        'https://cwwp2.dot.ca.gov/data/d7/lcs/lcsStatusD07.json',
+        'https://cwwp2.dot.ca.gov/data/d8/lcs/lcsStatusD08.json',
+        'https://cwwp2.dot.ca.gov/data/d9/lcs/lcsStatusD09.json',
+        'https://cwwp2.dot.ca.gov/data/d10/lcs/lcsStatusD10.json',
+        'https://cwwp2.dot.ca.gov/data/d11/lcs/lcsStatusD11.json',
+        'https://cwwp2.dot.ca.gov/data/d12/lcs/lcsStatusD12.json',
+      ]
 
-    // TODO: rest of caltrans data
+      // TODO: rest of caltrans data
 
-    // TODO: Make data fetching dynamic for any type of data (not just cctv)
-    const fetchAllData = async () => {
-      try {
-        // Run through each url in current array and fetch data; make a promise it will return
-        const responses = await Promise.all(camUrls.map(url => fetch(url)));
-        // Parse responses into a json object
-        const dataPromises = responses.map(response => response.json());
-        // Await all json promises to resolve and store in jsonData object
-        const jsonData = await Promise.all(dataPromises);
-        // Combine all json data into one array of the url's type (i.e. CCTV, LCS, etc)
-        const allCams = jsonData.flatMap(json => json.data.map((cam: CCTV) => cam));
-        setCams(allCams);
-        //console.log(allCams.length);
-      } catch (error) {
-        alert("Something went wrong fetching camera data...");
-        console.error(error);
-      }
-    };
+      const allCams = await fetchAllData<CCTV>(camUrls);
+      setCams(allCams);
 
-    fetchAllData();
+      const allLcs = await fetchAllData<LCS>(lcsUrls);
+      setLcs(allLcs);
+
+    }
+
+    fetchData();
+
   }, []) // Only fetch data once on app load
 
   // Custom handler for pressing a marker
-  const handleMarkerPress = (cctv: CCTV) => {
+  const handleCamMarkerPress = (cctv: CCTV) => {
     // Set video source to current cctv
     var currCam = cctv.cctv.imageData.streamingVideoURL
     // Set img source to current cctv
@@ -120,6 +141,16 @@ export default function HomeScreen() {
     })
   }
 
+  // TODO: add more info
+  const handleLcsMarkerPress = (lcs: LCS) => {
+    router.push({
+      pathname: "lcs-details",
+      params: {
+        typeOfClosure: lcs.lcs.closure.typeOfClosure
+      }
+    })
+
+  }
   return (
     <View style={styles.container}>
       {/* Sets Google Maps as the map provider and initial region */}
@@ -141,11 +172,24 @@ export default function HomeScreen() {
           <Marker
             key={index}
             coordinate={{latitude: parseFloat(currCam.cctv.location.latitude), longitude: parseFloat(currCam.cctv.location.longitude)}}
-            onPress={() => handleMarkerPress(currCam)}
+            onPress={() => handleCamMarkerPress(currCam)}
             tracksViewChanges={false}
             pinColor="#00fbff"
           />
-        ))}
+        ))
+        }
+        {
+        // "" LCS
+        lcs.flatMap((currLcs, index) => (
+          <Marker
+            key={index}
+            coordinate={{latitude: parseFloat(currLcs.lcs.location.begin.beginLatitude), longitude: parseFloat(currLcs.lcs.location.begin.beginLongitude)}}
+            onPress={() => handleLcsMarkerPress(currLcs)}
+            tracksViewChanges={false}
+            pinColor="#ff0000"
+          />
+        ))
+        }
       </MapView>
     </View>
   );
