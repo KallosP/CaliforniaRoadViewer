@@ -22,17 +22,22 @@ export default function Layout() {
                 }}
             />
             <Drawer.Screen
-                name="marker-details/cctv-details"
+                name="marker-details"
                 options={{
-                    title: '',
+                    // Hide in drawer
+                    drawerItemStyle: { display: 'none' },
+                    headerShown: false
                 }}
             />
             <Drawer.Screen
-                name="marker-details/lcs-details"
+                name="custom-styles/global-safe-view"
                 options={{
-                    title: '',
+                    // Hide in drawer
+                    drawerItemStyle: { display: 'none' },
+                    headerShown: false
                 }}
             />
+ 
         </Drawer>
     </GestureHandlerRootView>
   );
