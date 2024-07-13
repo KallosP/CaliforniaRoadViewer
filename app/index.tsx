@@ -1,15 +1,6 @@
-import { router } from "expo-router";
 import React, { useEffect, useState } from 'react';
-import { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
-import MapView from "react-native-map-clustering";
-import { StyleSheet, View, StatusBar } from 'react-native';
-
-const INITIAL_REGION = {
-  latitude: 37.33,
-  longitude: -122,
-  latitudeDelta: 2,
-  longitudeDelta: 2,
-}
+import { StatusBar,} from 'react-native';
+import { MemoizeMapView } from './custom-components/memo-map';
 
 // Sets status bar style
 function setStatusBar (){
@@ -31,8 +22,8 @@ async function fetchAllData<T>(urlArr: string[]) {
     return allUrlData;
     //console.log(allCams.length);
   } catch (error) {
-    alert("Something went wrong fetching data...");
-    console.error(error);
+    alert("Something went wrong fetching data..." + error);
+    //console.error(error);
     return [];
   }
 }
@@ -45,11 +36,12 @@ export default function HomeScreen() {
   // State fore storing all cctvs
   const [cams, setCams] = useState<CCTV[]>([]);
   const [lcs, setLcs] = useState<LCS[]>([]);
-
   /*
     TODO: 
           - (DONE) MAINTAIN state of map when navigating to cctv page and navigating back, don't re-render the whole home/map page
-          - IMPROVE PERFORMANCE OF LOADING PAGES, ADD LOADING ICONS INSTEAD OF JUST WAITING on empty screen
+          - (DONE) IMPROVE PERFORMANCE OF LOADING PAGES
+          - Add loading icon on app startup for data fetching as fetch goes through cams, then lcs, etc. Loading message
+            and confirmation message for when all data/markers have been loaded
           - Add other caltrans data (lane closures, chain control, etc)
           - For live feeds that are in service but don't play, detect it somehow and show current image instead
             (go to fresno (districty 6), a lot of them are there; look into making the thumbnail of videos 
@@ -67,7 +59,6 @@ export default function HomeScreen() {
   useEffect(() => {
 
     async function fetchData () {
-      console.log('testing')
       const camUrls = [
         'https://cwwp2.dot.ca.gov/data/d1/cctv/cctvStatusD01.json',
         'https://cwwp2.dot.ca.gov/data/d2/cctv/cctvStatusD02.json',
@@ -113,91 +104,10 @@ export default function HomeScreen() {
 
   }, []) // Only fetch data once on app load
 
-  // Custom handler for pressing a marker
-  const handleCamMarkerPress = (cctv: CCTV) => {
-    // Set video source to current cctv
-    var currCam = cctv.cctv.imageData.streamingVideoURL
-    // Set img source to current cctv
-    var currImg = cctv.cctv.imageData.static.currentImageURL
-    // Pass current cctv info to cctv-details page
-    router.push({
-      pathname: "cctv-details",
-      params: {
-        videoSource: currCam,
-        imgSource: currImg,
-        county: cctv.cctv.location.county,
-        locationName: cctv.cctv.location.locationName,
-        nearbyPlace: cctv.cctv.location.nearbyPlace,
-        latlng: cctv.cctv.location.latitude + ", " + cctv.cctv.location.longitude,
-        elevation: cctv.cctv.location.elevation,
-        direction: cctv.cctv.location.direction,
-        route: cctv.cctv.location.route,
-        routeSuffix: cctv.cctv.location.routeSuffix,
-        postmilePrefix: cctv.cctv.location.postmilePrefix,
-        postmile: cctv.cctv.location.postmile,
-        alignment: cctv.cctv.location.alignment,
-        milepost: cctv.cctv.location.milepost,
-      }
-    })
-  }
-
-  // TODO: add more info
-  const handleLcsMarkerPress = (lcs: LCS) => {
-    router.push({
-      pathname: "lcs-details",
-      params: {
-        typeOfClosure: lcs.lcs.closure.typeOfClosure
-      }
-    })
-
-  }
   return (
-    <View style={styles.container}>
-      {/* Sets Google Maps as the map provider and initial region */}
-      <MapView
-        style={styles.map}
-        provider={PROVIDER_GOOGLE}
-        initialRegion={INITIAL_REGION}
-        radius={140}
-        minPoints={4}
-        extent={812}
-        moveOnMarkerPress={false}
-      // TODO: figure out why not displaying user location
-      //showsUserLocation
-      //showsMyLocationButton
-      >
-        {
-        // Run through all cameras and render a marker for each one's location
-        cams.flatMap((currCam, index) => (
-          <Marker
-            key={index}
-            coordinate={{latitude: parseFloat(currCam.cctv.location.latitude), longitude: parseFloat(currCam.cctv.location.longitude)}}
-            onPress={() => handleCamMarkerPress(currCam)}
-            tracksViewChanges={false}
-            pinColor="#00fbff"
-          />
-        ))
-        }
-        {
-        // "" LCS
-        lcs.flatMap((currLcs, index) => (
-          <Marker
-            key={index}
-            coordinate={{latitude: parseFloat(currLcs.lcs.location.begin.beginLatitude), longitude: parseFloat(currLcs.lcs.location.begin.beginLongitude)}}
-            onPress={() => handleLcsMarkerPress(currLcs)}
-            tracksViewChanges={false}
-            pinColor="#ff0000"
-          />
-        ))
-        }
-      </MapView>
-    </View>
+      <MemoizeMapView 
+        cams={cams}
+        lcs={lcs}
+      />
   );
 }
-
-// Manages the style of the various components in app
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-  map: { width: '100%', height: '100%' },
-  modal: {flex: 1, justifyContent: 'center', alignItems: 'center'},
-});

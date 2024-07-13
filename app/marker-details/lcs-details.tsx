@@ -1,27 +1,16 @@
-import { ActivityIndicator, StyleSheet, Text, View, TouchableOpacity, Image, SafeAreaView, ScrollView } from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, ScrollView } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
-import { Video, ResizeMode } from 'expo-av';
-import React, { useRef } from 'react';
+import React from 'react';
 
 // NOTE: rough template of cctv details page, will change in future
 
 export default function Home() {
   const { 
-    videoSource = "", imgSource = "", county = "", 
-    locationName = "", nearbyPlace = "",
-    latlng = "", elevation = "", direction = "",
-    route = "", routeSuffix = "", postmilePrefix = "",
-    postmile = "", alignment = "", milepost = "" 
+    typeOfClosure = "", 
   } = 
     useLocalSearchParams<{ 
-      videoSource: string, imgSource: string, county: string,
-      locationName: string, nearbyPlace: string, 
-      latlng: string, elevation: string, direction: string,
-      route: string, routeSuffix: string, postmilePrefix: string,
-      postmile: string, alignment: string, milepost: string
-     }>();
-
-  const videoRef = useRef(null);
+        typeOfClosure: string
+    }>();
 
   const renderDetailText = (label: string, value: string) => (
     <Text style={styles.detailsText}>
@@ -33,7 +22,7 @@ export default function Home() {
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
-          <Text style={styles.title}>CCTV Feed</Text>
+          <Text style={styles.title}>LCS Information</Text>
           <TouchableOpacity
             style={styles.closeButton}
             onPress={() => router.push('/')}
@@ -42,51 +31,9 @@ export default function Home() {
           </TouchableOpacity>
         </View>
 
-        <View style={styles.mediaContainer}>
-          {videoSource !== "" ? (
-            <Video
-              ref={videoRef}
-              source={{ uri: videoSource }}
-              style={styles.media}
-              useNativeControls={true}
-              shouldPlay={true}
-              isLooping={true}
-              resizeMode={ResizeMode.STRETCH}
-            >
-              <ActivityIndicator size="small" />
-            </Video>
-          ) : (
-            <Image
-              source={{ uri: imgSource }}
-              style={styles.media}
-              resizeMode="stretch"
-            />
-          )}
-          <Text style={styles.caption}>
-            {videoSource !== "" ? "Live Video" : "Most Recent Image"}
-          </Text>
-        </View>
-
-        {!videoSource && (
-          <Text style={styles.noVideoText}>
-            No live video available for this camera.
-          </Text>
-        )}
-
         <View style={styles.detailsContainer}>
           <Text style={styles.detailsTitle}>CCTV Details</Text>
-          {renderDetailText("Location", locationName)}
-          {renderDetailText("County", county)}
-          {renderDetailText("Nearby Place", nearbyPlace)}
-          {renderDetailText("Latitude/Longitude", latlng)}
-          {renderDetailText("Elevation", elevation)}
-          {renderDetailText("Direction", direction)}
-          {renderDetailText("Route", route)}
-          {renderDetailText("Route Suffix", routeSuffix)}
-          {renderDetailText("Postmile Prefix", postmilePrefix)}
-          {renderDetailText("Postmile", postmile)}
-          {renderDetailText("Alignment", alignment)}
-          {renderDetailText("Milepost", milepost)}
+          {renderDetailText("Type Of Closure", typeOfClosure)}
         </View>
       </ScrollView>
     </SafeAreaView>

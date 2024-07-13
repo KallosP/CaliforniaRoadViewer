@@ -22,13 +22,13 @@ export default function Layout() {
                 }}
             />
             <Drawer.Screen
-                name="cctv-details"
+                name="marker-details/cctv-details"
                 options={{
                     title: '',
                 }}
             />
             <Drawer.Screen
-                name="lcs-details"
+                name="marker-details/lcs-details"
                 options={{
                     title: '',
                 }}
