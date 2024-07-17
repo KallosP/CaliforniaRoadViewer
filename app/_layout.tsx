@@ -37,7 +37,14 @@ export default function Layout() {
                         headerShown: false
                     }}
                 />
-
+                <Drawer.Screen
+                    name="custom-styles/marker-details-style"
+                    options={{
+                        // Hide in drawer
+                        drawerItemStyle: { display: 'none' },
+                        headerShown: false
+                    }}
+                />
                 <Drawer.Screen
                     name="custom-styles/global-safe-view"
                     options={{

@@ -3,7 +3,7 @@ import React, { useRef, useState, useMemo } from 'react';
 import { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import MapView from "react-native-map-clustering";
 import { StyleSheet, View, Text } from 'react-native';
-import  BottomSheetModal, { BottomSheetView } from '@gorhom/bottom-sheet';
+import  BottomSheetModal, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { CCTV, LCS } from "../custom-types/url-types";
 import CctvDetail from "../marker-details/cctv-details"
 import LcsDetail from "../marker-details/lcs-details"
@@ -81,13 +81,11 @@ export const MemoizeMapView: React.FC<MemoizedMapViewProps> = React.memo(({cams,
         // Initiate bottom sheet in closed state
         index={-1}
       >
-        <BottomSheetView>
-            {currMarkerType?.type === 'cctv' ? <CctvDetail cctv={currMarkerType?.marker.cctv}/>
-            : currMarkerType?.type === 'lcs' ? <LcsDetail lcs={currMarkerType?.marker.lcs}/>
-            : <Text>No cctv rendered</Text>
-            }
+          {currMarkerType?.type === 'cctv' ? <CctvDetail cctv={currMarkerType?.marker.cctv}/>
+          : currMarkerType?.type === 'lcs' ? <LcsDetail lcs={currMarkerType?.marker.lcs}/>
+          : <Text>No cctv rendered</Text>
+          }
           
-        </BottomSheetView>
       </BottomSheetModal>
 
     </>
