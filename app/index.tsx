@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { StatusBar,} from 'react-native';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
+import { StatusBar, Text, StyleSheet } from 'react-native';
 import { MemoizeMapView } from './custom-components/memo-map';
+import { CCTV, LCS } from './custom-types/url-types';
 
 // Sets status bar style
 function setStatusBar (){
@@ -104,10 +105,13 @@ export default function HomeScreen() {
 
   }, []) // Only fetch data once on app load
 
+
   return (
+    <>
       <MemoizeMapView 
-        cams={cams}
-        lcs={lcs}
+          cams={cams}
+          lcs={lcs}
       />
+    </>
   );
 }

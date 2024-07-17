@@ -1,5 +1,5 @@
 // Specifying the layout of the cctv data for type checking
-type CCTV = {
+export type CCTV = {
   cctv: {
     index: string;
     recordTimestamp: {
@@ -48,7 +48,7 @@ type CCTV = {
   }
 }
 
-type LCS = {
+export type LCS = {
   lcs: {
     index: string;
     recordTimestamp: {

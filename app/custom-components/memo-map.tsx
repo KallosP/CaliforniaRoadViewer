@@ -1,8 +1,12 @@
 import { router } from "expo-router";
-import React from 'react';
+import React, { useRef, useState, useMemo } from 'react';
 import { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import MapView from "react-native-map-clustering";
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View, Text } from 'react-native';
+import  BottomSheetModal, { BottomSheetView } from '@gorhom/bottom-sheet';
+import { CCTV, LCS } from "../custom-types/url-types";
+import CctvDetail from "../marker-details/cctv-details"
+import LcsDetail from "../marker-details/lcs-details"
 
 const INITIAL_REGION = {
   latitude: 37.33,
@@ -16,85 +20,80 @@ interface MemoizedMapViewProps {
   lcs: LCS[]
 }
 
-// Custom handler for pressing a marker
-const handleCamMarkerPress = (cctv: CCTV) => {
-  // Set video source to current cctv
-  var currCam = cctv.cctv.imageData.streamingVideoURL
-  // Set img source to current cctv
-  var currImg = cctv.cctv.imageData.static.currentImageURL
-  // Pass current cctv info to cctv-details page
-  router.push({
-    pathname: "marker-details/cctv-details",
-    params: {
-      videoSource: currCam,
-      imgSource: currImg,
-      county: cctv.cctv.location.county,
-      locationName: cctv.cctv.location.locationName,
-      nearbyPlace: cctv.cctv.location.nearbyPlace,
-      latlng: cctv.cctv.location.latitude + ", " + cctv.cctv.location.longitude,
-      elevation: cctv.cctv.location.elevation,
-      direction: cctv.cctv.location.direction,
-      route: cctv.cctv.location.route,
-      routeSuffix: cctv.cctv.location.routeSuffix,
-      postmilePrefix: cctv.cctv.location.postmilePrefix,
-      postmile: cctv.cctv.location.postmile,
-      alignment: cctv.cctv.location.alignment,
-      milepost: cctv.cctv.location.milepost,
-    }
-  })
-}
-
-// TODO: add more info
-const handleLcsMarkerPress = (lcs: LCS) => {
-  router.push({
-    pathname: "marker-details/lcs-details",
-    params: {
-      typeOfClosure: lcs.lcs.closure.typeOfClosure
-    }
-  })
-}
+type MarkerType = { type: 'cctv'; marker: CCTV; } | { type: 'lcs'; marker: LCS; } 
 
 // Memoizing map view for performance improvement (otherwise map along with all markers re-renders every time; slows down app)
-export const MemoizeMapView: React.FC<MemoizedMapViewProps> = React.memo(({cams, lcs}) => (
- <MapView
-    style={styles.map}
-    provider={PROVIDER_GOOGLE}
-    initialRegion={INITIAL_REGION}
-    radius={140}
-    minPoints={4}
-    extent={512}
-    moveOnMarkerPress={false}
-    maxZoom={10}
-    // TODO: figure out why not displaying user location
-    // Need to enable location permissions, otherwise fails silently
-    //showsUserLocation
-    //showsMyLocationButton
-    >
-      {
-      // Run through all cameras and render a marker for each one's location
-      cams.flatMap((currCam: CCTV, index: number) => (
-        <Marker
-          key={index}
-          coordinate={{latitude: parseFloat(currCam.cctv.location.latitude), longitude: parseFloat(currCam.cctv.location.longitude)}}
-          onPress={() => handleCamMarkerPress(currCam)}
-          //tracksViewChanges={false}
-          pinColor="#00fbff"
-        />
-      ))}
-      {
-      // "" LCS
-      lcs.flatMap((currLcs: LCS, index: number) => (
-        <Marker
-          key={index}
-          coordinate={{latitude: parseFloat(currLcs.lcs.location.begin.beginLatitude), longitude: parseFloat(currLcs.lcs.location.begin.beginLongitude)}}
-          onPress={() => handleLcsMarkerPress(currLcs)}
-          //tracksViewChanges={false}
-          pinColor="#ff0000"
-        />
-      ))}
-    </MapView> 
-));
+export const MemoizeMapView: React.FC<MemoizedMapViewProps> = React.memo(({cams, lcs}) => {
+
+  const sheetRef = useRef<BottomSheetModal>(null);
+  const [currMarkerType, setCurrMarkerType] = useState<MarkerType>();
+  // Percentage of screen bottom sheet takes up/snaps to
+  const snapPoints = useMemo(() => ["40%", "90%"], []);
+
+  const handleMarkerPress = (marker: MarkerType) => {
+    sheetRef.current?.snapToIndex(0);
+    setCurrMarkerType(marker);
+  }
+
+  return (
+    <>
+      <MapView
+        style={styles.map}
+        provider={PROVIDER_GOOGLE}
+        initialRegion={INITIAL_REGION}
+        radius={140}
+        minPoints={4}
+        extent={512}
+        maxZoom={10}
+        moveOnMarkerPress={false}
+        // TODO: figure out why not displaying user location
+        // Need to enable location permissions, otherwise fails silently
+        //showsUserLocation
+        //showsMyLocationButton
+        >
+          {
+          // Run through all cameras and render a marker for each one's location
+          
+          cams.flatMap((currCam: CCTV, index: number) => (
+            <Marker
+              key={index}
+              coordinate={{latitude: parseFloat(currCam.cctv.location.latitude), longitude: parseFloat(currCam.cctv.location.longitude)}}
+              onPress={() => {let camAsMarkerType: MarkerType = {type: 'cctv', marker: currCam}; handleMarkerPress(camAsMarkerType)}}
+              pinColor="#00fbff"
+            />
+          ))}
+          {
+          // "" LCS
+          lcs.flatMap((currLcs: LCS, index: number) => (
+            <Marker
+              key={index}
+              coordinate={{latitude: parseFloat(currLcs.lcs.location.begin.beginLatitude), longitude: parseFloat(currLcs.lcs.location.begin.beginLongitude)}}
+              onPress={() => {let lcsAsMarkerType: MarkerType = {type: 'lcs', marker: currLcs}; handleMarkerPress(lcsAsMarkerType)}}
+              pinColor="#ff0000"
+            />
+          ))}
+      </MapView> 
+
+      <BottomSheetModal
+        ref={sheetRef}
+        snapPoints={snapPoints}
+        enablePanDownToClose={true}
+        // Initiate bottom sheet in closed state
+        index={-1}
+      >
+        <BottomSheetView>
+            {currMarkerType?.type === 'cctv' ? <CctvDetail cctv={currMarkerType?.marker.cctv}/>
+            : currMarkerType?.type === 'lcs' ? <LcsDetail lcs={currMarkerType?.marker.lcs}/>
+            : <Text>No cctv rendered</Text>
+            }
+          
+        </BottomSheetView>
+      </BottomSheetModal>
+
+    </>
+  );
+});
 
 const styles = StyleSheet.create({
-  map: { width: '100%', height: '100%' },
+  map: {flex: 1 },
 });
