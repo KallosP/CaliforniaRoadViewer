@@ -144,3 +144,37 @@ export type LCS = {
   };
 };
 
+export type CC = {
+  cc: {
+      index: string;
+      recordTimestamp: {
+          recordDate: string;
+          recordTime: string;
+      };
+      location: {
+          district: string;
+          locationName: string;
+          nearbyPlace: string;
+          longitude: string;
+          latitude: string;
+          elevation: string;
+          direction: string;
+          county: string;
+          route: string;
+          routeSuffix: string;
+          postmilePrefix: string;
+          postmile: string;
+          alignment: string;
+          milepost: string;
+      };
+      inService: string;
+      statusData: {
+          statusTimestamp: {
+              statusDate: string;
+              statusTime: string;
+          };
+          status: string;
+          statusDescription: string;
+      };
+  };
+}

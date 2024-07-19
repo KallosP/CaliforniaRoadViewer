@@ -1,5 +1,4 @@
 import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, ScrollView } from "react-native";
-import { useLocalSearchParams } from "expo-router";
 import { LCS } from "../custom-types/url-types";
 import React from 'react';
 import MarkerDetailsStyle from "../custom-styles/marker-details-style";

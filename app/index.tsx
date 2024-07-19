@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { StatusBar, Text, StyleSheet } from 'react-native';
 import { MemoizeMapView } from './custom-components/memo-map';
-import { CCTV, LCS } from './custom-types/url-types';
+import { CCTV, LCS, CC } from './custom-types/url-types';
 
 // Sets status bar style
 function setStatusBar (){
@@ -10,7 +10,8 @@ function setStatusBar (){
   StatusBar.setBarStyle('light-content');
 }
 
-async function fetchAllData<T>(urlArr: string[]) {
+var numMarkers = 0;
+async function fetchAllData(urlType: string, urlArr: string[]) {
   try {
     // Run through each url in current array and fetch data; make a promise it will return
     const responses = await Promise.all(urlArr.map(url => fetch(url)));
@@ -19,9 +20,14 @@ async function fetchAllData<T>(urlArr: string[]) {
     // Await all json promises to resolve and store in jsonData object
     const jsonData = await Promise.all(dataPromises);
     // Combine all json data into one array of the url's type (i.e. CCTV, LCS, etc)
-    const allUrlData = jsonData.flatMap(json => json.data.map((item: T) => item));
+    const allUrlData = jsonData.flatMap(json => 
+      json.data.filter((item: CCTV | LCS | CC ) => 
+        // Filter out all chain control markers that are not in effect (R-0 = not in effect)
+        !(urlType === "CC" && (item as CC).cc.statusData.status === "R-0") &&
+        // Filter out all non-active closures
+        !(urlType === "LCS" && (item as LCS).lcs.closure.code1097.isCode1097 === "false"))
+    );
     return allUrlData;
-    //console.log(allCams.length);
   } catch (error) {
     alert("Something went wrong fetching data..." + error);
     //console.error(error);
@@ -34,13 +40,18 @@ async function fetchAllData<T>(urlArr: string[]) {
 export default function HomeScreen() {
 
   //const navigation = useRouter();
-  // State fore storing all cctvs
+  // CCTVs
   const [cams, setCams] = useState<CCTV[]>([]);
+  // Lane closures
   const [lcs, setLcs] = useState<LCS[]>([]);
+  // Chain control
+  const [cc, setCC] = useState<CC[]>([]);
   /*
     TODO: 
           - (DONE) MAINTAIN state of map when navigating to cctv page and navigating back, don't re-render the whole home/map page
           - (DONE) IMPROVE PERFORMANCE OF LOADING PAGES
+          - FIGURE OUT HOW TO HANDLE Tens of thousands of markers, clustering glitches out after adding third type (CCs). come up
+            with strategy for best possible fix/way to handle this
           - Add loading icon on app startup for data fetching as fetch goes through cams, then lcs, etc. Loading message
             and confirmation message for when all data/markers have been loaded
           - Add other caltrans data (lane closures, chain control, etc)
@@ -91,13 +102,33 @@ export default function HomeScreen() {
         'https://cwwp2.dot.ca.gov/data/d12/lcs/lcsStatusD12.json',
       ]
 
+      const ccUrls = [
+        'https://cwwp2.dot.ca.gov/data/d1/cc/ccStatusD01.json',
+        'https://cwwp2.dot.ca.gov/data/d2/cc/ccStatusD02.json',
+        'https://cwwp2.dot.ca.gov/data/d3/cc/ccStatusD03.json',
+        'https://cwwp2.dot.ca.gov/data/d6/cc/ccStatusD06.json',
+        'https://cwwp2.dot.ca.gov/data/d7/cc/ccStatusD07.json',
+        'https://cwwp2.dot.ca.gov/data/d8/cc/ccStatusD08.json',
+        'https://cwwp2.dot.ca.gov/data/d9/cc/ccStatusD09.json',
+        'https://cwwp2.dot.ca.gov/data/d10/cc/ccStatusD10.json',
+        'https://cwwp2.dot.ca.gov/data/d11/cc/ccStatusD11.json',
+      ]
+
       // TODO: rest of caltrans data
 
-      const allCams = await fetchAllData<CCTV>(camUrls);
+      const allCams = await fetchAllData('CCTV', camUrls);
       setCams(allCams);
+      numMarkers += allCams.length
 
-      const allLcs = await fetchAllData<LCS>(lcsUrls);
+      const allLcs = await fetchAllData('LCS', lcsUrls);
       setLcs(allLcs);
+      numMarkers += allLcs.length
+
+      const allCCs = await fetchAllData('CC', ccUrls);
+      setCC(allCCs);
+      numMarkers += allCCs.length
+
+      console.log(numMarkers)
 
     }
 
@@ -111,6 +142,7 @@ export default function HomeScreen() {
       <MemoizeMapView 
           cams={cams}
           lcs={lcs}
+          cc={cc}
       />
     </>
   );
