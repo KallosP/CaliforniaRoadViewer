@@ -1,19 +1,14 @@
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Drawer } from 'expo-router/drawer';
-import { DrawerItem } from '@react-navigation/drawer';
+import  CustomDrawer from './custom-components/custom-drawer';
 
 export default function Layout() {
   return (
     <>
         <GestureHandlerRootView style={{ flex: 1 }}>
             <Drawer
-                // Ignore cctv_details screen in drawer
-                screenOptions={({route}) => ({
-                    drawerItemStyle: {
-                        display: route.name === 'cctv-details' ? 'none' : 'flex',
-                    },
-                })}
-            >
+                drawerContent={(props) => { return <CustomDrawer /> }}
+            >                
                 <Drawer.Screen
                     // This is the name of the page and must match the url from root
                     name="index" 
@@ -56,14 +51,6 @@ export default function Layout() {
                 />
                 <Drawer.Screen
                     name="marker-details/cc-details"
-                    options={{
-                        // Hide in drawer
-                        drawerItemStyle: { display: 'none' },
-                        headerShown: false
-                    }}
-                />
-                <Drawer.Screen
-                    name="test"
                     options={{
                         // Hide in drawer
                         drawerItemStyle: { display: 'none' },

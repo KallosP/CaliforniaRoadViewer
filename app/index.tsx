@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StatusBar, Text, StyleSheet } from 'react-native';
 import { MemoizeMapView } from './custom-components/memo-map';
 import { CCTV, LCS, CC } from './custom-types/url-types';
@@ -65,6 +65,7 @@ export default function HomeScreen() {
           - Resize camera feeds/images if too small (maybe make a button that the user presses which tries to resize the cctv)
           - Add custom loading icon for app startup/app logo
           - Clean up UI
+          - Generate new Google Maps API key before publishing to app store 
           - ...*/
   
   setStatusBar();
