@@ -1,5 +1,6 @@
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Drawer } from 'expo-router/drawer';
+import { DrawerItem } from '@react-navigation/drawer';
 
 export default function Layout() {
   return (
@@ -53,7 +54,22 @@ export default function Layout() {
                         headerShown: false
                     }}
                 />
-    
+                <Drawer.Screen
+                    name="marker-details/cc-details"
+                    options={{
+                        // Hide in drawer
+                        drawerItemStyle: { display: 'none' },
+                        headerShown: false
+                    }}
+                />
+                <Drawer.Screen
+                    name="test"
+                    options={{
+                        // Hide in drawer
+                        drawerItemStyle: { display: 'none' },
+                        headerShown: false
+                    }}
+                />
             </Drawer>
         </GestureHandlerRootView>
     </>

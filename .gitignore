@@ -41,4 +41,4 @@ android
 .env
 
 # ALWAYS add app.json here whenever pushing
-app.json
+#app.json

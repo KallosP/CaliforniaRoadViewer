@@ -18,7 +18,8 @@ const INITIAL_REGION = {
 
 interface MemoizedMapViewProps {
   cams: CCTV[]
-  lcs: LCS[]
+  lcsFull: LCS[]
+  lcsOther: LCS[]
   cc: CC[]
 }
 
@@ -26,26 +27,17 @@ type MarkerType = { type: 'cctv'; marker: CCTV; } | { type: 'lcs'; marker: LCS; 
                 | { type: 'cc'; marker: CC; }
 
 // Memoizing map view for performance improvement (otherwise map along with all markers re-renders every time; slows down app)
-export const MemoizeMapView: React.FC<MemoizedMapViewProps> = React.memo(({cams, lcs, cc}) => {
+export const MemoizeMapView: React.FC<MemoizedMapViewProps> = React.memo(({cams, cc, lcsFull, lcsOther}) => {
 
   const sheetRef = useRef<BottomSheetModal>(null);
   const [currMarkerType, setCurrMarkerType] = useState<MarkerType>();
   // Percentage of screen bottom sheet takes up/snaps to
   const snapPoints = useMemo(() => ["7%", "40%", "90%"], []);
 
-  const [showLCSEnd, setLCSEnd] = useState(false);
-  const [currLCSMarker, setCurrLCSMarker] = useState<LCS>();
   const [bottomSheetIsOpen, setBottomSheetIsOpen] = useState(false);
   const [isOpening, setIsOpening] = useState(false);
 
   const handleMarkerPress = (marker: MarkerType) => {
-    if(marker.type === 'lcs') {
-      setLCSEnd(true);
-      setCurrLCSMarker(marker.marker);
-    }
-    else{
-      setLCSEnd(false);
-    }
     setCurrMarkerType(marker);
     setIsOpening(true);
     sheetRef.current?.snapToIndex(1);
@@ -93,14 +85,32 @@ export const MemoizeMapView: React.FC<MemoizedMapViewProps> = React.memo(({cams,
               pinColor="#00fbff"
             />
           ))}
-          { // "" LCS
-          lcs.flatMap((currLcs: LCS, index: number) => (
-            <Marker
-              key={index}
-              coordinate={{latitude: parseFloat(currLcs.lcs.location.begin.beginLatitude), longitude: parseFloat(currLcs.lcs.location.begin.beginLongitude)}}
-              onPress={() => {let lcsAsMarkerType: MarkerType = {type: 'lcs', marker: currLcs}; handleMarkerPress(lcsAsMarkerType)}}
-              pinColor="#ff0000"
-            />
+          { // "" Full LCS closures
+          lcsFull.flatMap((currFullLcsBegin: LCS, index: number) => (
+              <Marker
+                key={index}
+                coordinate={{latitude: parseFloat(currFullLcsBegin.lcs.location.begin.beginLatitude), longitude: parseFloat(currFullLcsBegin.lcs.location.begin.beginLongitude)}}
+                onPress={() => {let lcsAsMarkerType: MarkerType = {type: 'lcs', marker: currFullLcsBegin}; handleMarkerPress(lcsAsMarkerType)}}
+                pinColor="#ff0000"
+              />
+          ))}
+          { // "" Full LCS closures
+          lcsFull.flatMap((currFullLcsEnd: LCS, index: number) => (
+              <Marker
+                key={index}
+                coordinate={{latitude: parseFloat(currFullLcsEnd.lcs.location.end.endLatitude), longitude: parseFloat(currFullLcsEnd.lcs.location.end.endLongitude)}}
+                onPress={() => {let lcsAsMarkerType: MarkerType = {type: 'lcs', marker: currFullLcsEnd}; handleMarkerPress(lcsAsMarkerType)}}
+                pinColor="#ff0000"
+              />
+          ))}
+          {
+          lcsOther.flatMap((currOtherLcs: LCS, index: number) => (
+          <Marker
+            key={index}
+            coordinate={{latitude: parseFloat(currOtherLcs.lcs.location.begin.beginLatitude), longitude: parseFloat(currOtherLcs.lcs.location.begin.beginLongitude)}}
+            onPress={() => {let lcsAsMarkerType: MarkerType = {type: 'lcs', marker: currOtherLcs}; handleMarkerPress(lcsAsMarkerType)}}
+            pinColor="#ff9d00"
+          />
           ))}
           { // "" CC
           cc.flatMap((currCC: CC, index: number) => (
@@ -111,22 +121,6 @@ export const MemoizeMapView: React.FC<MemoizedMapViewProps> = React.memo(({cams,
               pinColor="#42f59e"
             />
           ))}
-
-
-          {
-          showLCSEnd && (
-            <Marker
-              // @ts-ignore
-              coordinate={{latitude: parseFloat(currLCSMarker?.lcs.location.end.endLatitude), longitude: parseFloat(currLCSMarker?.lcs.location.end.endLongitude)}} pinColor="#eb34d3"
-              // Always elevate index in case end location is same as another marker's start location
-              zIndex={1}
-              title="Lane Closure End"
-              description="End Location"
-            >
-              <Text >Test</Text>
-              <Image source={require('../../assets/icon.png')} style={{width: 50, height: 50}}/>
-            </Marker> 
-          )}
 
       </MapView> 
 

@@ -1,0 +1,51 @@
+{
+  "expo": {
+    "name": "CaliforniaRoadViewer",
+    "slug": "CaliforniaRoadViewer",
+    "scheme": "CaliforniaRoadViewer",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.kallosp.CaliforniaRoadViewer",
+      "versionCode": 1,
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyCq3gC3tefBPRmwd847QRJ9_C73XX0v2ek"
+        }
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "75bd7cbb-87a7-4ba9-bbed-a754044d0b80"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/75bd7cbb-87a7-4ba9-bbed-a754044d0b80"
+    },
+    "plugins": [
+      "expo-video",
+      "expo-av",
+      "expo-router"
+    ]
+  }
+}

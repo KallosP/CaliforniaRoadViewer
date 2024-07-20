@@ -44,13 +44,15 @@ export default function HomeScreen() {
   const [cams, setCams] = useState<CCTV[]>([]);
   // Lane closures
   const [lcs, setLcs] = useState<LCS[]>([]);
+  const [lcsFull, setLcsFull] = useState<LCS[]>([]);
+  const [lcsOther, setLcsOther] = useState<LCS[]>([]);
   // Chain control
   const [cc, setCC] = useState<CC[]>([]);
   /*
     TODO: 
           - (DONE) MAINTAIN state of map when navigating to cctv page and navigating back, don't re-render the whole home/map page
           - (DONE) IMPROVE PERFORMANCE OF LOADING PAGES
-          - FIGURE OUT HOW TO HANDLE Tens of thousands of markers, clustering glitches out after adding third type (CCs). come up
+          - (DONE - no need, removed unnecessary marker types) FIGURE OUT HOW TO HANDLE Tens of thousands of markers, clustering glitches out after adding third type (CCs). come up
             with strategy for best possible fix/way to handle this
           - Add loading icon on app startup for data fetching as fetch goes through cams, then lcs, etc. Loading message
             and confirmation message for when all data/markers have been loaded
@@ -124,6 +126,19 @@ export default function HomeScreen() {
       setLcs(allLcs);
       numMarkers += allLcs.length
 
+      const lcsFull = allLcs.filter(lcs => lcs.lcs.closure.typeOfClosure === "Full");
+      setLcsFull(lcsFull)
+      const lcsOther = allLcs.filter(lcs => !(lcs.lcs.closure.typeOfClosure === "Full"));
+      setLcsOther(lcsOther)
+/*      lcsOther.forEach(lcs => {
+        if(lcs.lcs.closure.typeOfClosure === "Full"){
+          console.log('fail')
+        } 
+        else{
+          console.log('pass')
+        }
+      })*/
+
       const allCCs = await fetchAllData('CC', ccUrls);
       setCC(allCCs);
       numMarkers += allCCs.length
@@ -141,7 +156,8 @@ export default function HomeScreen() {
     <>
       <MemoizeMapView 
           cams={cams}
-          lcs={lcs}
+          lcsFull={lcsFull}
+          lcsOther={lcsOther}
           cc={cc}
       />
     </>
