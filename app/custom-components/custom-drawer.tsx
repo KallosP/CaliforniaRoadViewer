@@ -1,40 +1,94 @@
-import { StyleSheet, View, Text, Image } from 'react-native';
+import { StyleSheet, View, Text, Image} from 'react-native';
 import { useState } from 'react';
-import Checkbox from 'expo-checkbox';
+import CheckboxComponent from './custom-checkbox';
 
 
 // TODO: design/implement custom drawer
 export default function CustomDrawer() {
 
-    const [isChecked, setChecked] = useState(false);
+  const [isCamChecked, setCamChecked] = useState(false);
+  const [isLcsChecked, setLcsChecked] = useState(false);
+  const [isFullLcsChecked, setFullLcsChecked] = useState(false);
+  const [isTrafficChecked, setTrafficChecked] = useState(false);
 
-    return (
+  const handleCheckboxPress = (checkType: string) => {
+    if(checkType === 'cam') {
+      setCamChecked(!isCamChecked);
+      return;
+    }
+    if(checkType === 'lcs') {
+      setLcsChecked(!isLcsChecked);
+      return;
+    }   
+    if(checkType === 'fullLcs') {
+      setFullLcsChecked(!isFullLcsChecked);
+      return;
+    }   
+    if(checkType === 'traffic') {
+      setTrafficChecked(!isTrafficChecked);
+      return;
+    }   
+  };
 
-        <View style={styles.container}>
-            <Image style={{width: 100, height: 100}} source={require('../../assets/icon.png')}/>
+  return (
 
-            <View style={styles.section}>
-                <Checkbox style={styles.checkbox} value={isChecked} onValueChange={setChecked} />
-                <Text style={styles.paragraph}>Normal checkbox</Text>
-            </View>
-        </View>
-    );
+    <View style={styles.container}>
+      {/* Header Image */}
+      <View style={styles.headerImageContainer}>
+        <Image style={styles.headerImage} source={require('../../assets/icon.png')} />
+      </View>
+
+      {/* Tools/Pages Section */}
+      <View style={styles.navAndToolsContainer}>
+
+        <CheckboxComponent 
+          isChecked={isCamChecked} 
+          onPress={() => handleCheckboxPress('cam')} 
+          label="Cameras" />
+
+        <CheckboxComponent 
+          isChecked={isLcsChecked} 
+          onPress={() => handleCheckboxPress('lcs')} 
+          label="Lane Closures" />
+
+        <CheckboxComponent 
+          isChecked={isFullLcsChecked} 
+          onPress={() => handleCheckboxPress('fullLcs')} 
+          label="Full Closures" />
+
+        <CheckboxComponent 
+          isChecked={isTrafficChecked} 
+          onPress={() => handleCheckboxPress('traffic')} 
+          label="Show Traffic" />
+
+      </View>
+
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginHorizontal: 16,
-    marginVertical: 32,
+    justifyContent: 'flex-start',
   },
-  section: {
-    flexDirection: 'row',
+  headerImageContainer: {
+    height: "25%",
+    width: "100%",
+    backgroundColor: '#E5E5E5',
+    // Aligns children to center (in vertical direction)
+    justifyContent: 'center',
+    // Aligns children to center (in cross direction)
     alignItems: 'center',
   },
-  paragraph: {
-    fontSize: 15,
+  headerImage: {
+    width: 100,
+    height: 100,
   },
-  checkbox: {
-    margin: 8,
+  navAndToolsContainer: {
+    // Children go from left-to-right with 'row'
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    margin: 20,
   },
 });
