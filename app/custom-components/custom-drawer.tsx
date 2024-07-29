@@ -1,15 +1,20 @@
 import { StyleSheet, View, Text, Image} from 'react-native';
 import { useState } from 'react';
 import CheckboxComponent from './custom-checkbox';
+import { useAppContext } from '../app-context';
 
 
 // TODO: design/implement custom drawer
 export default function CustomDrawer() {
 
-  const [isCamChecked, setCamChecked] = useState(false);
+    const {
+        isCamChecked, setCamChecked,
+    } = useAppContext();
+
   const [isLcsChecked, setLcsChecked] = useState(false);
   const [isFullLcsChecked, setFullLcsChecked] = useState(false);
   const [isTrafficChecked, setTrafficChecked] = useState(false);
+
 
   const handleCheckboxPress = (checkType: string) => {
     if(checkType === 'cam') {
@@ -66,6 +71,7 @@ export default function CustomDrawer() {
     </View>
   );
 }
+CustomDrawer.name = 'CustomDrawer';
 
 const styles = StyleSheet.create({
   container: {
@@ -89,6 +95,7 @@ const styles = StyleSheet.create({
     // Children go from left-to-right with 'row'
     flexDirection: 'column',
     alignItems: 'flex-start',
-    margin: 20,
+    marginTop: 20,
+    marginHorizontal: 10,
   },
 });

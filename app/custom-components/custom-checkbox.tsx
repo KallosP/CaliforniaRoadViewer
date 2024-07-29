@@ -16,6 +16,8 @@ const CheckboxComponent = ({ isChecked, onPress, label }: {isChecked: boolean, o
   );
 };
 
+CheckboxComponent.name = 'CheckboxComponent';
+
 const styles = StyleSheet.create({
   baseBoxContainer: {
     flexDirection: 'row',

@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { StatusBar, Text, StyleSheet } from 'react-native';
+import { StatusBar, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { MemoizeMapView } from './custom-components/memo-map';
 import { CCTV, LCS, CC } from './custom-types/url-types';
+import { useAppContext } from './app-context';
 
 // Sets status bar style
 function setStatusBar (){
@@ -48,6 +49,12 @@ export default function HomeScreen() {
   const [lcsOther, setLcsOther] = useState<LCS[]>([]);
   // Chain control
   const [cc, setCC] = useState<CC[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const {
+    isCamChecked, setCamChecked,
+  } = useAppContext();
+
   /*
     TODO: 
           - (DONE) MAINTAIN state of map when navigating to cctv page and navigating back, don't re-render the whole home/map page
@@ -73,6 +80,7 @@ export default function HomeScreen() {
   // Storing data from all districts in CA
   useEffect(() => {
 
+    // TODO: figure out if you want user to wait until all data is loaded, if yes change this to synchronous
     async function fetchData () {
       const camUrls = [
         'https://cwwp2.dot.ca.gov/data/d1/cctv/cctvStatusD01.json',
@@ -144,6 +152,7 @@ export default function HomeScreen() {
       setCC(allCCs);
       numMarkers += allCCs.length
 
+      setIsLoading(false)
       console.log(numMarkers)
 
     }
@@ -155,12 +164,15 @@ export default function HomeScreen() {
 
   return (
     <>
-      <MemoizeMapView 
-          cams={cams}
-          lcsFull={lcsFull}
-          lcsOther={lcsOther}
-          cc={cc}
-      />
+      {false ? <ActivityIndicator style={{flex: 1}} /> : 
+        <MemoizeMapView 
+            cams={cams}
+            lcsFull={lcsFull}
+            lcsOther={lcsOther}
+            cc={cc}
+            isCamChecked={isCamChecked}
+        />
+      } 
     </>
   );
 }

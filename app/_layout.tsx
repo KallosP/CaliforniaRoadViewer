@@ -1,13 +1,18 @@
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Drawer } from 'expo-router/drawer';
-import  CustomDrawer from './custom-components/custom-drawer';
+import CustomDrawer from './custom-components/custom-drawer';
+import React, { useState } from 'react';
+import { AppProvider, useAppContext } from './app-context';
+
 
 export default function Layout() {
   return (
-    <>
+    <AppProvider>
         <GestureHandlerRootView style={{ flex: 1 }}>
             <Drawer
-                drawerContent={(props) => { return <CustomDrawer /> }}
+                drawerContent={() => { 
+                    return <CustomDrawer /> 
+                }}
             >                
                 <Drawer.Screen
                     // This is the name of the page and must match the url from root
@@ -59,6 +64,6 @@ export default function Layout() {
                 />
             </Drawer>
         </GestureHandlerRootView>
-    </>
+    </AppProvider>
   );
 }
