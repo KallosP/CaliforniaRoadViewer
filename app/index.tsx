@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { StatusBar, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, StatusBar, TextInput, StyleSheet, ActivityIndicator } from 'react-native';
 import { MemoizeMapView } from './custom-components/memo-map';
 import { CCTV, LCS, CC } from './custom-types/url-types';
-import { useAppContext } from './app-context';
+import Marker from 'react-native-maps';
 
 // Sets status bar style
-function setStatusBar (){
+function setStatusBar() {
   // TODO: Check if this works on IOS
-  StatusBar.setBackgroundColor('black');
-  StatusBar.setBarStyle('light-content');
+  StatusBar.setBackgroundColor('white');
+  StatusBar.setBarStyle('dark-content');
 }
 
 var numMarkers = 0;
@@ -21,8 +21,8 @@ async function fetchAllData(urlType: string, urlArr: string[]) {
     // Await all json promises to resolve and store in jsonData object
     const jsonData = await Promise.all(dataPromises);
     // Combine all json data into one array of the url's type (i.e. CCTV, LCS, etc)
-    const allUrlData = jsonData.flatMap(json => 
-      json.data.filter((item: CCTV | LCS | CC ) => 
+    const allUrlData = jsonData.flatMap(json =>
+      json.data.filter((item: CCTV | LCS | CC) =>
         // Filter out all chain control markers that are not in effect (R-0 = not in effect)
         !(urlType === "CC" && (item as CC).cc.statusData.status === "R-0") &&
         // Filter out all non-active closures
@@ -40,7 +40,6 @@ async function fetchAllData(urlType: string, urlArr: string[]) {
 //       ALWAYS make custom styles for otherwise default components (e.g. buttons)
 export default function HomeScreen() {
 
-  //const navigation = useRouter();
   // CCTVs
   const [cams, setCams] = useState<CCTV[]>([]);
   // Lane closures
@@ -50,10 +49,6 @@ export default function HomeScreen() {
   // Chain control
   const [cc, setCC] = useState<CC[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-
-  const {
-    isCamChecked, setCamChecked,
-  } = useAppContext();
 
   /*
     TODO: 
@@ -74,14 +69,14 @@ export default function HomeScreen() {
           - Clean up UI
           - Generate new Google Maps API key before publishing to app store 
           - ...*/
-  
+
   setStatusBar();
 
   // Storing data from all districts in CA
   useEffect(() => {
 
     // TODO: figure out if you want user to wait until all data is loaded, if yes change this to synchronous
-    async function fetchData () {
+    async function fetchData() {
       const camUrls = [
         'https://cwwp2.dot.ca.gov/data/d1/cctv/cctvStatusD01.json',
         'https://cwwp2.dot.ca.gov/data/d2/cctv/cctvStatusD02.json',
@@ -139,14 +134,14 @@ export default function HomeScreen() {
       setLcsFull(lcsFull)
       const lcsOther = allLcs.filter(lcs => !(lcs.lcs.closure.typeOfClosure === "Full"));
       setLcsOther(lcsOther)
-/*      lcsOther.forEach(lcs => {
-        if(lcs.lcs.closure.typeOfClosure === "Full"){
-          console.log('fail')
-        } 
-        else{
-          console.log('pass')
-        }
-      })*/
+      /*      lcsOther.forEach(lcs => {
+              if(lcs.lcs.closure.typeOfClosure === "Full"){
+                console.log('fail')
+              } 
+              else{
+                console.log('pass')
+              }
+            })*/
 
       const allCCs = await fetchAllData('CC', ccUrls);
       setCC(allCCs);
@@ -161,18 +156,27 @@ export default function HomeScreen() {
 
   }, []) // Only fetch data once on app load
 
-
   return (
     <>
-      {false ? <ActivityIndicator style={{flex: 1}} /> : 
-        <MemoizeMapView 
-            cams={cams}
-            lcsFull={lcsFull}
-            lcsOther={lcsOther}
-            cc={cc}
-            isCamChecked={isCamChecked}
-        />
-      } 
+
+      <MemoizeMapView
+        cams={cams}
+        lcsFull={lcsFull}
+        lcsOther={lcsOther}
+        cc={cc}
+      />
+
+      {isLoading && (
+        <ActivityIndicator color="#50FFB3" size={100} style={styles.activityIndicator} />
+      )}
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  activityIndicator: {
+    width: '100%',
+    height: '100%',
+    position: 'absolute',
+  },
+});

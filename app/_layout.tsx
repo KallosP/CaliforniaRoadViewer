@@ -2,14 +2,52 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Drawer } from 'expo-router/drawer';
 import CustomDrawer from './custom-components/custom-drawer';
 import React, { useState } from 'react';
-import { AppProvider, useAppContext } from './app-context';
+import { Stack } from 'expo-router';
 
 
 export default function Layout() {
-  return (
-    <AppProvider>
+    return (
         <GestureHandlerRootView style={{ flex: 1 }}>
-            <Drawer
+            <Stack>
+                <Stack.Screen
+                    name="index"
+                    options={{
+                        title: 'Home',
+                        headerShown: false,
+                    }}
+                />
+                <Stack.Screen
+                    name="marker-details/cctv-details"
+                    options={{
+                        headerShown: false,
+                    }}
+                />
+                <Stack.Screen
+                    name="marker-details/lcs-details"
+                    options={{
+                        headerShown: false,
+                    }}
+                />
+                <Stack.Screen
+                    name="custom-styles/marker-details-style"
+                    options={{
+                        headerShown: false,
+                    }}
+                />
+                <Stack.Screen
+                    name="custom-styles/global-safe-view"
+                    options={{
+                        headerShown: false,
+                    }}
+                />
+                <Stack.Screen
+                    name="marker-details/cc-details"
+                    options={{
+                        headerShown: false,
+                    }}
+                />
+            </Stack>
+            {/*<Drawer
                 drawerContent={() => { 
                     return <CustomDrawer /> 
                 }}
@@ -62,8 +100,7 @@ export default function Layout() {
                         headerShown: false
                     }}
                 />
-            </Drawer>
+            </Drawer>*/}
         </GestureHandlerRootView>
-    </AppProvider>
-  );
+    );
 }

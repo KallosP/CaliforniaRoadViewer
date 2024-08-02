@@ -1,16 +1,12 @@
 import { StyleSheet, View, Text, Image} from 'react-native';
 import { useState } from 'react';
 import CheckboxComponent from './custom-checkbox';
-import { useAppContext } from '../app-context';
 
 
 // TODO: design/implement custom drawer
 export default function CustomDrawer() {
 
-    const {
-        isCamChecked, setCamChecked,
-    } = useAppContext();
-
+  const [isCamChecked, setCamChecked] = useState(false);
   const [isLcsChecked, setLcsChecked] = useState(false);
   const [isFullLcsChecked, setFullLcsChecked] = useState(false);
   const [isTrafficChecked, setTrafficChecked] = useState(false);
