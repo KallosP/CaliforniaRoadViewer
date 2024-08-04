@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, StatusBar, TextInput, StyleSheet, ActivityIndicator } from 'react-native';
 import { MemoizeMapView } from './custom-components/memo-map';
-import { CCTV, LCS, CC } from './custom-types/url-types';
+import { CCTV, LCS, CC, CHP } from './custom-types/url-types';
 import Marker from 'react-native-maps';
 
 // Sets status bar style
@@ -11,7 +11,6 @@ function setStatusBar() {
   StatusBar.setBarStyle('dark-content');
 }
 
-var numMarkers = 0;
 async function fetchAllData(urlType: string, urlArr: string[]) {
   try {
     // Run through each url in current array and fetch data; make a promise it will return
@@ -22,7 +21,8 @@ async function fetchAllData(urlType: string, urlArr: string[]) {
     const jsonData = await Promise.all(dataPromises);
     // Combine all json data into one array of the url's type (i.e. CCTV, LCS, etc)
     const allUrlData = jsonData.flatMap(json =>
-      json.data.filter((item: CCTV | LCS | CC) =>
+      json.data
+      .filter((item: CCTV | LCS | CC) =>
         // Filter out all chain control markers that are not in effect (R-0 = not in effect)
         !(urlType === "CC" && (item as CC).cc.statusData.status === "R-0") &&
         // Filter out all non-active closures
@@ -48,6 +48,7 @@ export default function HomeScreen() {
   const [lcsOther, setLcsOther] = useState<LCS[]>([]);
   // Chain control
   const [cc, setCC] = useState<CC[]>([]);
+  const [chpIncs, setCHPIncs] = useState<CHP[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   /*
@@ -77,6 +78,34 @@ export default function HomeScreen() {
 
     // TODO: figure out if you want user to wait until all data is loaded, if yes change this to synchronous
     async function fetchData() {
+      // CHP Data ------
+      // CHP incidents URL
+      const chpIncUrl = 'https://media.chp.ca.gov/sa_xml/sa.xml';
+      // Setup the XML string parser (for converting to JSON)
+      const parseString = require('react-native-xml2js').parseString;
+
+      // Fetch XML url
+      fetch(chpIncUrl)
+        // Once fetched, use response as text
+        .then(response => response.text())
+        // Take the text (string) and convert to JSON
+        .then((response) => {
+            parseString(response, function (err: Error, result: JSON) {
+                if (err) {
+                  alert('XML to JSON error: ' + err);
+                  return;
+                }
+                const chpData = transformToCHPArray(result);
+                setCHPIncs(chpData);
+                //console.log(JSON.stringify(chpData, null, 2));
+            });
+        // Catch any errors that occur
+        }).catch((err) => {
+            console.log('fetch', err)
+        })
+
+      // CalTrans Data ------
+      // Cams
       const camUrls = [
         'https://cwwp2.dot.ca.gov/data/d1/cctv/cctvStatusD01.json',
         'https://cwwp2.dot.ca.gov/data/d2/cctv/cctvStatusD02.json',
@@ -108,6 +137,7 @@ export default function HomeScreen() {
         'https://cwwp2.dot.ca.gov/data/d12/lcs/lcsStatusD12.json',
       ]
 
+      // Chain control
       const ccUrls = [
         'https://cwwp2.dot.ca.gov/data/d1/cc/ccStatusD01.json',
         'https://cwwp2.dot.ca.gov/data/d2/cc/ccStatusD02.json',
@@ -120,41 +150,96 @@ export default function HomeScreen() {
         'https://cwwp2.dot.ca.gov/data/d11/cc/ccStatusD11.json',
       ]
 
-      // TODO: rest of caltrans data
-
       const allCams = await fetchAllData('CCTV', camUrls);
       setCams(allCams);
-      numMarkers += allCams.length
 
       const allLcs = await fetchAllData('LCS', lcsUrls);
       setLcs(allLcs);
-      numMarkers += allLcs.length
 
       const lcsFull = allLcs.filter(lcs => lcs.lcs.closure.typeOfClosure === "Full");
       setLcsFull(lcsFull)
       const lcsOther = allLcs.filter(lcs => !(lcs.lcs.closure.typeOfClosure === "Full"));
       setLcsOther(lcsOther)
-      /*      lcsOther.forEach(lcs => {
-              if(lcs.lcs.closure.typeOfClosure === "Full"){
-                console.log('fail')
-              } 
-              else{
-                console.log('pass')
-              }
-            })*/
 
       const allCCs = await fetchAllData('CC', ccUrls);
       setCC(allCCs);
-      numMarkers += allCCs.length
 
       setIsLoading(false)
-      console.log(numMarkers)
 
     }
 
     fetchData();
 
   }, []) // Only fetch data once on app load
+
+
+const transformToCHPArray = (data: any): CHP[] => {
+    const logs: CHP[] = [];
+    // Extract logs from the parsed JSON object,
+    // [0] at end of props to account for converting
+    // single elements into arrays during XML to JSON conversion
+    const centers = data.State.Center;
+    for (const center of centers) {
+        const dispatches = center.Dispatch || [];
+        for (const dispatch of dispatches) {
+            const logsArray = dispatch.Log || [];
+            for (const log of logsArray) {
+                // Split up latlon
+                const latLonString = log.LATLON?.[0] || '';
+                // Remove quotes and whitespace from latlon before processing
+                const cleanedLatLonString = latLonString.replace(/["']/g, '').trim();
+                const [latStr, lonStr] = cleanedLatLonString.split(':');
+                const lat = (parseFloat(latStr) / 1000000).toString();
+                const long = (-parseFloat(lonStr) / 1000000).toString();
+
+                const logDetails = log.LogDetails?.[0] || {};
+
+                // Process LogDetails
+                const details = logDetails.details.map((detail: any) => ({
+                  detailTime: detail.DetailTime || '',
+                  incidentDetail: detail.IncidentDetail || ''
+                })) || [];
+
+                var units = [];
+                // Process units if present
+                if(logDetails.units !== undefined) {
+                  units = logDetails.units.map((unit: any) => ({
+                    unitTime: unit.UnitTime || '',
+                    unitDetail: unit.UnitDetail || ''
+                  })) || [];
+                }
+
+                logs.push({
+                        center: [{
+                            id: center.$?.ID || '',
+                            dispatch: [{
+                                id: dispatch.$?.ID || '',
+                                log: [{
+                                    id: log.$?.ID || '',
+                                    logTime: log.LogTime?.[0] || '',
+                                    logType: log.LogType?.[0] || '',
+                                    location: log.Location?.[0] || '',
+                                    locationDesc: log.LocationDesc?.[0] || '',
+                                    area: log.Area?.[0] || '',
+                                    thomasBrothers: log.ThomasBrothers?.[0] || '',
+                                    lat: lat,
+                                    long: long,
+                                    logDetails: [{
+                                        details: details, 
+                                        units: units,
+                                    }]
+                                }]
+                            }]
+                        }]
+                    }
+                );
+            }
+        }
+    }
+
+    return logs;
+  };
+
 
   return (
     <>
@@ -164,6 +249,7 @@ export default function HomeScreen() {
         lcsFull={lcsFull}
         lcsOther={lcsOther}
         cc={cc}
+        chpIncs={chpIncs}
       />
 
       {isLoading && (

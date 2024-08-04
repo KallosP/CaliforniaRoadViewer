@@ -1,5 +1,6 @@
 // Specifying the layout of the cctv data for type checking
 export type CCTV = {
+  id: number;
   cctv: {
     index: string;
     recordTimestamp: {
@@ -49,6 +50,7 @@ export type CCTV = {
 }
 
 export type LCS = {
+  id: number;
   lcs: {
     index: string;
     recordTimestamp: {
@@ -145,6 +147,7 @@ export type LCS = {
 };
 
 export type CC = {
+  id: number;
   cc: {
       index: string;
       recordTimestamp: {
@@ -177,4 +180,58 @@ export type CC = {
           statusDescription: string;
       };
   };
+}
+
+export type CHP = {
+    center: {
+      id: string;
+      dispatch: {
+        id: string;
+        log: {
+          id: string;
+          logTime: string;
+          logType: string;
+          location: string;
+          locationDesc: string;
+          area: string;
+          thomasBrothers: string;
+          lat: string;
+          long: string;
+          logDetails: {
+            details: {
+              detailTime: string;
+              incidentDetail: string;
+            }[];
+            units: {
+              unitTime: string;
+              unitDetail: string;
+            }[];
+          }[];
+        }[];
+      }[];
+    }[];
+};
+
+export type CHPLog = {
+  log: {
+          id: string;
+          logTime: string;
+          logType: string;
+          location: string;
+          locationDesc: string;
+          area: string;
+          thomasBrothers: string;
+          lat: string;
+          long: string;
+          logDetails: {
+            details: {
+              detailTime: string;
+              incidentDetail: string;
+            }[];
+            units: {
+              unitTime: string;
+              unitDetail: string;
+            }[];
+          }[];
+  }[];
 }

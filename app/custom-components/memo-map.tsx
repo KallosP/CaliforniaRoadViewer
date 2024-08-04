@@ -1,23 +1,25 @@
-import { router } from "expo-router";
 import React, { useRef, useState, useMemo, useEffect, useCallback } from 'react';
-import { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import { Marker, MarkerAnimated, PROVIDER_GOOGLE } from 'react-native-maps';
 import MapView from "react-native-map-clustering";
-import { StyleSheet, View, Text, Image, Button, ScrollView, Pressable} from 'react-native';
+import { Animated, StyleSheet, View, Text, Image, Button, ScrollView, Pressable} from 'react-native';
 import  BottomSheetModal, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
-import { CCTV, LCS, CC } from "../custom-types/url-types";
+import { CCTV, LCS, CC, CHP } from "../custom-types/url-types";
 import CctvDetail from "../marker-details/cctv-details";
 import LcsDetail from "../marker-details/lcs-details";
 import CcDetail from "../marker-details/cc-details";
+import ChpDetail from "../marker-details/chp-details";
 import XIcon from '../../assets/x_icon.svg';
 import CctvIcon from '../../assets/cctv_icon.svg';
 import FullLcsIcon from '../../assets/full_lcs_icon.svg';
 import OtherLcsIcon from '../../assets/other_lcs_icon.svg';
 import CCIcon from '../../assets/cc_icon.svg';
+import ChpIcon from '../../assets/chp_icon.svg';
 import Ripple from 'react-native-material-ripple';
 import CctvMarkerIcon from '../../assets/cam_marker.svg';
 import FullMarkerIcon from '../../assets/full_marker.svg';
 import OtherMarkerIcon from '../../assets/other_marker.svg';
 import CCMarkerIcon from '../../assets/cc_marker.svg';
+import ChpMarkerIcon from '../../assets/chp_marker.svg';
 
 const INITIAL_REGION = {
   latitude: 37.33,
@@ -31,16 +33,20 @@ interface MemoizedMapViewProps {
   lcsFull: LCS[]
   lcsOther: LCS[]
   cc: CC[]
+  chpIncs: CHP[]
 }
 
 type MarkerType = { type: 'cctv'; marker: CCTV; } | { type: 'lcsFull'; marker: LCS; } 
                 | { type: 'lcsOther'; marker: LCS; } | { type: 'cc'; marker: CC; }
+                | { type: 'chpInc'; marker: CHP; }
 
 // Main color for all markers/filters
 const MARKER_COLOR = '#50FFB3';
 
+// Incremented then assigned to component keys for always unique keys
+var keyCtr = 0;
 // Memoizing map view for performance improvement (otherwise map along with all markers re-renders every time; slows down app)
-export const MemoizeMapView: React.FC<MemoizedMapViewProps> = React.memo(({cams, cc, lcsFull, lcsOther, }) => {
+export const MemoizeMapView: React.FC<MemoizedMapViewProps> = React.memo(({cams, cc, lcsFull, lcsOther, chpIncs}) => {
 
   const sheetRef = useRef<BottomSheetModal>(null);
   const [currMarkerType, setCurrMarkerType] = useState<MarkerType>();
@@ -55,8 +61,38 @@ export const MemoizeMapView: React.FC<MemoizedMapViewProps> = React.memo(({cams,
   const [lcsFullPressed, setLcsFullPressed] = useState(false);
   const [lcsOtherPressed, setLcsOtherPressed] = useState(false);
   const [ccPressed, setCCPressed] = useState(false);
+  const [chpIncPressed, setChpIncPressed] = useState(false);
+
+//  const markerScales = React.useRef<{ [key: number]: Animated.Value }>({});
+//
+//  // Initialize marker scales in useEffect
+//  useEffect(() => {
+//    const newScales = { ...markerScales.current };
+//    for (const marker of cams) {
+//      if (!newScales[marker.id]) {
+//        newScales[marker.id] = new Animated.Value(1);
+//      }
+//    }
+//    markerScales.current = newScales;
+//  }, [cams]);
+//
+//  const animateMarker = (m: MarkerType) => {
+//    const scale = markerScales.current[m.marker.id];
+//    Animated.timing(scale, {
+//     toValue: 6.25,
+//     duration: 100,
+//     useNativeDriver: false,
+//    }).start(() => {
+//     Animated.timing(scale, {
+//       toValue: 1,
+//       duration: 100,
+//       useNativeDriver: false,
+//    }).start();
+//   });
+//  };
 
   const handleMarkerPress = (marker: MarkerType) => {
+    //animateMarker(marker);
     setCurrMarkerType(marker);
     setIsOpening(true);
     sheetRef.current?.snapToIndex(1);
@@ -68,12 +104,14 @@ export const MemoizeMapView: React.FC<MemoizedMapViewProps> = React.memo(({cams,
     if (markerType === 'lcsFull') !lcsFullPressed ? setLcsFullPressed(true) : setLcsFullPressed(false);
     if (markerType === 'lcsOther') !lcsOtherPressed ? setLcsOtherPressed(true) : setLcsOtherPressed(false);
     if (markerType === 'cc') !ccPressed ? setCCPressed(true) : setCCPressed(false);
+    if (markerType === 'chpInc') !chpIncPressed ? setChpIncPressed(true) : setChpIncPressed(false);
     // Clear all filters
     if (markerType === 'clear'){
       setCamPressed(false);
       setLcsFullPressed(false);
       setLcsOtherPressed(false);
       setCCPressed(false);
+      setChpIncPressed(false);
     }
     // Closes bottom sheet
     sheetRef.current?.close();
@@ -100,14 +138,20 @@ export const MemoizeMapView: React.FC<MemoizedMapViewProps> = React.memo(({cams,
   const displayCamMarkers = useMemo(() => {
     return cams.flatMap((currCam: CCTV, index: number) => (
       <Marker
-        key={index}
+        key={++keyCtr}
         coordinate={{latitude: parseFloat(currCam.cctv.location.latitude), longitude: parseFloat(currCam.cctv.location.longitude)}}
         onPress={() => {let camAsMarkerType: MarkerType = {type: 'cctv', marker: currCam}; handleMarkerPress(camAsMarkerType)}}
         pinColor={MARKER_COLOR}
         identifier="cctv"
         tracksViewChanges={false}
       >
-        <CctvMarkerIcon />
+       {/* <Animated.View 
+          style={{
+            transform: [{scale: markerScales.current[currCam.id]}]
+          }}
+        >*/}
+          <CctvMarkerIcon />
+        {/*</Marker></Animated.View>*/}
       </Marker>
   ))
   }, [cams]);
@@ -116,7 +160,7 @@ export const MemoizeMapView: React.FC<MemoizedMapViewProps> = React.memo(({cams,
   const displayLcsFullMarkers = useMemo(() => {
     return lcsFull.flatMap((currFullLcsBegin: LCS, index: number) => (
     <Marker
-      key={index}
+      key={++keyCtr}
       coordinate={{latitude: parseFloat(currFullLcsBegin.lcs.location.begin.beginLatitude), longitude: parseFloat(currFullLcsBegin.lcs.location.begin.beginLongitude)}}
       onPress={() => {let lcsAsMarkerType: MarkerType = {type: 'lcsFull', marker: currFullLcsBegin}; handleMarkerPress(lcsAsMarkerType)}}
       pinColor={MARKER_COLOR}
@@ -131,7 +175,7 @@ export const MemoizeMapView: React.FC<MemoizedMapViewProps> = React.memo(({cams,
   const displayLcsOtherMarkers = useMemo(() => {
     return lcsOther.flatMap((currOtherLcs: LCS, index: number) => (
     <Marker
-      key={index}
+      key={++keyCtr}
       coordinate={{latitude: parseFloat(currOtherLcs.lcs.location.begin.beginLatitude), longitude: parseFloat(currOtherLcs.lcs.location.begin.beginLongitude)}}
       onPress={() => {let lcsAsMarkerType: MarkerType = {type: 'lcsOther', marker: currOtherLcs}; handleMarkerPress(lcsAsMarkerType)}}
       pinColor={MARKER_COLOR}
@@ -146,7 +190,7 @@ export const MemoizeMapView: React.FC<MemoizedMapViewProps> = React.memo(({cams,
   const displayCCMarkers = useMemo(() => {
     return cc.flatMap((currCC: CC, index: number) => (
     <Marker
-      key={index}
+      key={++keyCtr}
       coordinate={{latitude: parseFloat(currCC.cc.location.latitude), longitude: parseFloat(currCC.cc.location.longitude)}}
       onPress={() => {let ccAsMarkerType: MarkerType = {type: 'cc', marker: currCC}; handleMarkerPress(ccAsMarkerType)}}
       pinColor={MARKER_COLOR}
@@ -157,6 +201,21 @@ export const MemoizeMapView: React.FC<MemoizedMapViewProps> = React.memo(({cams,
   ))
   }, [cc]);
 
+  // CHP (CHP Incident) Markers
+  const displayChpIncMarkers = useMemo(() => {
+    return chpIncs.flatMap((currChpInc: CHP, index: number) => (
+    <Marker
+      key={++keyCtr}
+      coordinate={{latitude: parseFloat(currChpInc.center[0].dispatch[0].log[0].lat), longitude: parseFloat(currChpInc.center[0].dispatch[0].log[0].long)}}
+      onPress={() => {let chpIncAsMarkerType: MarkerType = {type: 'chpInc', marker: currChpInc}; handleMarkerPress(chpIncAsMarkerType)}}
+      pinColor={MARKER_COLOR}
+      tracksViewChanges={false}
+    >
+      <ChpMarkerIcon />
+    </Marker>
+  ))
+  }, [chpIncs]);
+
   // Called/re-rendered whenever a filter is pressed
   // Renders all markers that are being filtered
   const getMarkers = useCallback(() => {
@@ -165,9 +224,10 @@ export const MemoizeMapView: React.FC<MemoizedMapViewProps> = React.memo(({cams,
     if (lcsFullPressed) markersArr = markersArr.concat(displayLcsFullMarkers);
     if (lcsOtherPressed) markersArr = markersArr.concat(displayLcsOtherMarkers);
     if (ccPressed) markersArr = markersArr.concat(displayCCMarkers);
+    if (chpIncPressed) markersArr = markersArr.concat(displayChpIncMarkers);
 
     return markersArr;
-  }, [camPressed, lcsFullPressed, lcsOtherPressed, ccPressed]);
+  }, [camPressed, lcsFullPressed, lcsOtherPressed, ccPressed, chpIncPressed]);
 
   return (
     <>
@@ -240,6 +300,14 @@ export const MemoizeMapView: React.FC<MemoizedMapViewProps> = React.memo(({cams,
           <CCIcon height={15} width={15} style={styles.filterIcon}/>
           <Text style={styles.filterText}>Chain Control</Text>
         </Ripple>
+        <Ripple 
+          onPress={() => {handleFilterPress('chpInc')}} 
+          style={[styles.filterButtonBase, chpIncPressed ? styles.filterButtonIn : styles.filterButtonOut]}
+          rippleContainerBorderRadius={20}
+        >
+          <ChpIcon height={15} width={15} style={styles.filterIcon}/>
+          <Text style={styles.filterText}>CHP Incidents</Text>
+        </Ripple>
       </ScrollView>
 
       <BottomSheetModal
@@ -250,11 +318,12 @@ export const MemoizeMapView: React.FC<MemoizedMapViewProps> = React.memo(({cams,
         index={-1}
         onClose={() => setBottomSheetIsOpen(false)}
       >
-          {currMarkerType?.type === 'cctv' ? <CctvDetail cctv={currMarkerType?.marker.cctv}/>
-          : currMarkerType?.type === 'lcsFull' ? <LcsDetail lcs={currMarkerType?.marker.lcs}/>
-          : currMarkerType?.type === 'lcsOther' ? <LcsDetail lcs={currMarkerType?.marker.lcs}/>
-          : currMarkerType?.type === 'cc' ? <CcDetail cc={currMarkerType?.marker.cc}/>
-          : <Text>No cctv rendered</Text>
+          {currMarkerType?.type === 'cctv' ? <CctvDetail id={currMarkerType?.marker.id} cctv={currMarkerType?.marker.cctv}/>
+          : currMarkerType?.type === 'lcsFull' ? <LcsDetail id={currMarkerType?.marker.id} lcs={currMarkerType?.marker.lcs}/>
+          : currMarkerType?.type === 'lcsOther' ? <LcsDetail id={currMarkerType?.marker.id} lcs={currMarkerType?.marker.lcs}/>
+          : currMarkerType?.type === 'cc' ? <CcDetail id={currMarkerType?.marker.id} cc={currMarkerType?.marker.cc}/>
+          : currMarkerType?.type === 'chpInc' ? <ChpDetail log={currMarkerType?.marker.center[0].dispatch[0].log}/>
+          : <Text>No Data Available</Text>
           }
           
       </BottomSheetModal>
