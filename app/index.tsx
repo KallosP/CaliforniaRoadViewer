@@ -52,6 +52,11 @@ export default function HomeScreen() {
 
   /*
     TODO: 
+
+          - Live feed substitute for current image (if live feed is in service)
+          - Dark theme
+          - Apple Dev Creation
+
           - Organize details page data to be more readable for all types of data
           - Figure out how to access highway condition search data and integrate
           - (DONE) MAINTAIN state of map when navigating to cctv page and navigating back, don't re-render the whole home/map page
