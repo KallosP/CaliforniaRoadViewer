@@ -1,7 +1,7 @@
 import React, { useRef, useState, useMemo, useEffect, useCallback } from 'react';
 import { Marker, MarkerAnimated, PROVIDER_GOOGLE } from 'react-native-maps';
 import MapView from "react-native-map-clustering";
-import { Animated, StyleSheet, View, Text, Image, Button, ScrollView, Pressable} from 'react-native';
+import { Alert, Linking, Animated, StyleSheet, View, Text, Image, Button, ScrollView, Pressable} from 'react-native';
 import  BottomSheetModal, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { CCTV, LCS, CC, CHP } from "../custom-types/url-types";
 import CctvDetail from "../marker-details/cctv-details";
@@ -12,6 +12,9 @@ import XIcon from '../../assets/x_icon.svg';
 import CctvIcon from '../../assets/cctv_icon.svg';
 import FullLcsIcon from '../../assets/full_lcs_icon.svg';
 import OtherLcsIcon from '../../assets/other_lcs_icon.svg';
+import TrafficIcon from '../../assets/traffic_icon.svg';
+import SunIcon from '../../assets/sun_icon.svg'
+import CenterUserIcon from '../../assets/center_user_icon.svg'
 import CCIcon from '../../assets/cc_icon.svg';
 import ChpIcon from '../../assets/chp_icon.svg';
 import Ripple from 'react-native-material-ripple';
@@ -20,6 +23,8 @@ import FullMarkerIcon from '../../assets/full_marker.svg';
 import OtherMarkerIcon from '../../assets/other_marker.svg';
 import CCMarkerIcon from '../../assets/cc_marker.svg';
 import ChpMarkerIcon from '../../assets/chp_marker.svg';
+import * as Location from 'expo-location';
+import LocationPermissionsModal from '../custom-components/permissions-modal';
 
 const INITIAL_REGION = {
   latitude: 37.33,
@@ -62,6 +67,11 @@ export const MemoizeMapView: React.FC<MemoizedMapViewProps> = React.memo(({cams,
   const [lcsOtherPressed, setLcsOtherPressed] = useState(false);
   const [ccPressed, setCCPressed] = useState(false);
   const [chpIncPressed, setChpIncPressed] = useState(false);
+
+  const [showTraffic, setTraffic] = useState(false);
+  const [isDarkMode, setDarkMode] = useState(false);
+  const mapRef = useRef(null);
+  const [isModalVisible, setModalVisible] = useState(false);
 
 //  const markerScales = React.useRef<{ [key: number]: Animated.Value }>({});
 //
@@ -229,9 +239,36 @@ export const MemoizeMapView: React.FC<MemoizedMapViewProps> = React.memo(({cams,
     return markersArr;
   }, [camPressed, lcsFullPressed, lcsOtherPressed, ccPressed, chpIncPressed]);
 
+  const handleCenterUserPress = async () => {
+
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== 'granted') {
+      setModalVisible(true);
+      return;
+    }
+
+    let currentLocation = await Location.getCurrentPositionAsync({});
+
+    const {latitude, longitude} = currentLocation.coords;
+
+    const region = {
+      latitude,
+      longitude,
+      latitudeDelta: 0.01,
+      longitudeDelta: 0.01
+    }
+
+    if(mapRef.current)
+      //@ts-ignore
+      mapRef.current.animateToRegion(region, 1000);
+    else 
+      alert('Something went wrong...')
+  }
+
   return (
     <>
       <MapView
+        ref={mapRef}
         style={styles.map}
         provider={PROVIDER_GOOGLE}
         initialRegion={INITIAL_REGION}
@@ -240,75 +277,118 @@ export const MemoizeMapView: React.FC<MemoizedMapViewProps> = React.memo(({cams,
         extent={512}
         maxZoom={10}
         moveOnMarkerPress={false}
-        showsTraffic={true}
+        showsTraffic={showTraffic}
         onTouchStart={() => {handleMapPress()}}
         clusterColor={MARKER_COLOR}
         // TODO: figure out why not displaying user location
         // Need to enable location permissions, otherwise fails silently
-        //showsUserLocation
-        //showsMyLocationButton
+        showsUserLocation={true}
+        showsMyLocationButton={false}
         >
 
           {getMarkers()}
 
       </MapView> 
 
-      <ScrollView
-        horizontal
-        style={styles.filterContainer}
-        showsHorizontalScrollIndicator={false}
-        overScrollMode="never"
-      >
-        <Ripple 
-          onPress={() => {handleFilterPress('clear')}} 
-          style={[styles.filterButtonBase, styles.filterButtonX]}
-          rippleContainerBorderRadius={20}
-        >
-            <XIcon height={15} width={15} style={styles.filterIcon}/>
-            <Text style={styles.filterText}>Clear</Text>
-        </Ripple>
-        <Ripple 
-          onPress={() => {handleFilterPress('cctv')}} 
-          style={[styles.filterButtonBase, camPressed ? styles.filterButtonIn : styles.filterButtonOut]}
-          rippleContainerBorderRadius={20}
-        >
-          <CctvIcon height={15} width={15} style={styles.filterIcon}/>
-          <Text style={styles.filterText}>Cameras</Text>
-        </Ripple>
+      <LocationPermissionsModal
+        isVisible={isModalVisible}
+        onClose={() => setModalVisible(false)}
+      />
 
-        <Ripple 
-          onPress={() => {handleFilterPress('lcsFull')}} 
-          style={[styles.filterButtonBase, lcsFullPressed ? styles.filterButtonIn : styles.filterButtonOut]}
-          rippleContainerBorderRadius={20}
-        >
-          <FullLcsIcon height={15} width={15} style={styles.filterIcon}/>
-          <Text style={styles.filterText}>Full Closures</Text>
-        </Ripple>
-        <Ripple
-          onPress={() => {handleFilterPress('lcsOther')}} 
-          style={[styles.filterButtonBase, lcsOtherPressed ? styles.filterButtonIn : styles.filterButtonOut]}
-          rippleContainerBorderRadius={20}
-        >
-          <OtherLcsIcon height={15} width={15} style={styles.filterIcon}/>
-          <Text style={styles.filterText}>Other Closures</Text>
-        </Ripple>
-        <Ripple 
-          onPress={() => {handleFilterPress('cc')}} 
-          style={[styles.filterButtonBase, ccPressed ? styles.filterButtonIn : styles.filterButtonOut]}
-          rippleContainerBorderRadius={20}
-        >
-          <CCIcon height={15} width={15} style={styles.filterIcon}/>
-          <Text style={styles.filterText}>Chain Control</Text>
-        </Ripple>
-        <Ripple 
-          onPress={() => {handleFilterPress('chpInc')}} 
-          style={[styles.filterButtonBase, chpIncPressed ? styles.filterButtonIn : styles.filterButtonOut]}
-          rippleContainerBorderRadius={20}
-        >
-          <ChpIcon height={15} width={15} style={styles.filterIcon}/>
-          <Text style={styles.filterText}>CHP Incidents</Text>
-        </Ripple>
-      </ScrollView>
+      <View style={styles.buttonContainer}>
+        <ScrollView
+          horizontal
+          style={styles.filterContainer}
+          showsHorizontalScrollIndicator={false}
+          overScrollMode="never"
+        >        
+          <Ripple 
+            onPress={() => {handleFilterPress('clear')}} 
+            style={[styles.filterButtonBase, styles.filterButtonX]}
+            rippleContainerBorderRadius={20}
+          >
+              <XIcon height={15} width={15} style={styles.filterIcon}/>
+              <Text style={styles.filterText}>Clear</Text>
+          </Ripple>
+
+          <Ripple 
+            onPress={() => {handleFilterPress('cctv')}} 
+            style={[styles.filterButtonBase, camPressed ? styles.filterButtonIn : styles.filterButtonOut]}
+            rippleContainerBorderRadius={20}
+          >
+            <CctvIcon height={15} width={15} style={styles.filterIcon}/>
+            <Text style={styles.filterText}>Cameras</Text>
+          </Ripple>
+
+          <Ripple 
+            onPress={() => {handleFilterPress('lcsFull')}} 
+            style={[styles.filterButtonBase, lcsFullPressed ? styles.filterButtonIn : styles.filterButtonOut]}
+            rippleContainerBorderRadius={20}
+          >
+            <FullLcsIcon height={15} width={15} style={styles.filterIcon}/>
+            <Text style={styles.filterText}>Full Closures</Text>
+          </Ripple>
+          <Ripple
+            onPress={() => {handleFilterPress('lcsOther')}} 
+            style={[styles.filterButtonBase, lcsOtherPressed ? styles.filterButtonIn : styles.filterButtonOut]}
+            rippleContainerBorderRadius={20}
+          >
+            <OtherLcsIcon height={15} width={15} style={styles.filterIcon}/>
+            <Text style={styles.filterText}>Other Closures</Text>
+          </Ripple>
+          <Ripple 
+            onPress={() => {handleFilterPress('cc')}} 
+            style={[styles.filterButtonBase, ccPressed ? styles.filterButtonIn : styles.filterButtonOut]}
+            rippleContainerBorderRadius={20}
+          >
+            <CCIcon height={15} width={15} style={styles.filterIcon}/>
+            <Text style={styles.filterText}>Chain Control</Text>
+          </Ripple>
+          <Ripple 
+            onPress={() => {handleFilterPress('chpInc')}} 
+            style={[styles.filterButtonBase, chpIncPressed ? styles.filterButtonIn : styles.filterButtonOut]}
+            rippleContainerBorderRadius={20}
+          >
+            <ChpIcon height={15} width={15} style={styles.filterIcon}/>
+            <Text style={styles.filterText}>CHP Incidents</Text>
+          </Ripple>
+        </ScrollView>
+
+        <View style={styles.miscButtonContainer}>
+          {/* Top row misc buttons*/}
+          <View style={styles.miscButtonsRow}>
+            {/* Toggle traffic button*/}
+            <Ripple 
+              onPress={() => {setTraffic(!showTraffic)}} 
+              style={[styles.miscButton, styles.filterButtonBase, showTraffic ? styles.filterButtonIn : styles.filterButtonOut]}
+              rippleContainerBorderRadius={20}
+            >
+              <TrafficIcon />
+            </Ripple>
+            {/* Center user button*/}
+            <Ripple 
+              onPress={() => {handleCenterUserPress()}} 
+              style={[styles.miscButton, styles.filterButtonBase, styles.filterButtonOut]}
+              rippleContainerBorderRadius={20}
+            >
+              <CenterUserIcon />
+            </Ripple>
+          </View>
+
+          {/* Second row misc buttons*/}
+          <View style={styles.miscButtonsRow}>
+            {/* Toggle dark mode button*/}
+            <Ripple 
+              onPress={() => {setDarkMode(!isDarkMode)}} 
+              style={[styles.miscButton, styles.filterButtonBase, isDarkMode ? styles.filterButtonIn : styles.filterButtonOut]}
+              rippleContainerBorderRadius={20}
+            >
+              <SunIcon />
+            </Ripple>
+          </View>
+
+        </View>
+      </View> 
 
       <BottomSheetModal
         ref={sheetRef}
@@ -334,11 +414,32 @@ export const MemoizeMapView: React.FC<MemoizedMapViewProps> = React.memo(({cams,
 
 const styles = StyleSheet.create({
   map: {flex: 1},
-  filterContainer: {
+  buttonContainer: {
     position: 'absolute',
     marginVertical: 45,
-    padding: 10,
+    paddingTop: 10,
     paddingLeft: 0,
+  },
+  miscButtonContainer: {
+    marginTop: 20,
+  },
+  miscButton: {
+    width: 50,
+    height: 50,
+    borderRadius: 50,
+    marginBottom: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  miscButtonsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  filterContainer: {
+/*    position: 'absolute',
+    marginVertical: 45,
+    padding: 10,
+    paddingLeft: 0,*/
     flexDirection: 'row',
   },
   filterButtonBase: {

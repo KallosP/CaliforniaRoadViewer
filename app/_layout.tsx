@@ -4,7 +4,6 @@ import CustomDrawer from './custom-components/custom-drawer';
 import React, { useState } from 'react';
 import { Stack } from 'expo-router';
 
-
 export default function Layout() {
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>

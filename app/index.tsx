@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { View, StatusBar, TextInput, StyleSheet, ActivityIndicator } from 'react-native';
 import { MemoizeMapView } from './custom-components/memo-map';
 import { CCTV, LCS, CC, CHP } from './custom-types/url-types';
-import Marker from 'react-native-maps';
 
 // Sets status bar style
 function setStatusBar() {
@@ -53,6 +52,8 @@ export default function HomeScreen() {
 
   /*
     TODO: 
+          - Organize details page data to be more readable for all types of data
+          - Figure out how to access highway condition search data and integrate
           - (DONE) MAINTAIN state of map when navigating to cctv page and navigating back, don't re-render the whole home/map page
           - (DONE) IMPROVE PERFORMANCE OF LOADING PAGES
           - (DONE - no need, removed unnecessary marker types) FIGURE OUT HOW TO HANDLE Tens of thousands of markers, clustering glitches out after adding third type (CCs). come up
