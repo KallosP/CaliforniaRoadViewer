@@ -51,6 +51,8 @@ const darkModal = StyleSheet.create({
   modalContainer: {
     ...lightModal.modalContainer,
     backgroundColor: DARK_THEME_COLOR,
+    borderWidth: 1,
+    borderColor: 'black',
   },
   title: {
     ...lightModal.title,

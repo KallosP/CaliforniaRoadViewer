@@ -48,8 +48,6 @@ export default function HomeScreen() {
     TODO: 
 
           - Dark theme 
-          - FIX BUG with live video and most recent image buttons being swapped on initial load 
-            after loading a marker that has no live video available
           - Apple Dev Creation
 
           - Organize details page data to be more readable for all types of data

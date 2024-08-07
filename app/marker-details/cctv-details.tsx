@@ -56,8 +56,6 @@ export default function CctvDetail({ cctv }: CCTV) {
     if (videoSource === "") {
       setAllowVideo(false);
       setDisableButton(true);
-      setCaptionTextTop("Live Video");
-      setCaptionTextBottom("Most Recent Image");
     } 
     else{
       setAllowVideo(true);
@@ -78,6 +76,15 @@ export default function CctvDetail({ cctv }: CCTV) {
     }
   }
 
+  // Default to live video as top caption and most recent image as bottom
+  // when video source is not available
+  function showCaptionTop() {
+    return (videoSource === "") ? 'Live Video' : captionTextTop
+  }
+  function showCaptionBottom() {
+    return (videoSource === "") ? 'Most Recent Image' : captionTextBottom
+  }
+
   return (
     <>
       <View style={isDarkMode ? MarkerDetailsStyleDark.titleContainer : themeStyle.titleContainer}>
@@ -95,7 +102,7 @@ export default function CctvDetail({ cctv }: CCTV) {
 
       <BottomSheetScrollView>
         <View style={styles.spacingContainer}>
-          <View style={styles.mediaContainer}>
+          <View style={[styles.mediaContainerBase, isDarkMode ? styles.mediaContainerDark : styles.mediaContainerLight]}>
             {(showVideo && allowVideo) ? (
               <Video
                 key={++keyCtr}
@@ -119,11 +126,11 @@ export default function CctvDetail({ cctv }: CCTV) {
             <View style={styles.captionContainer}>
               <TouchableOpacity disabled={disableButton} style={[styles.buttonCaptionDisabled, disableButton ? styles.buttonCaptionDisabled : styles.buttonCaption]} onPress={() => disableButton ? alert("Video not available") : handleCaptionButtonPress()}>
                 <Text style={styles.buttonCaptionText}>
-                  {captionTextTop}
+                  {showCaptionTop()}
                 </Text>
               </TouchableOpacity>
               <Text style={styles.caption}>
-                  {captionTextBottom}
+                  {showCaptionBottom()}
               </Text>
 
             </View>
@@ -154,10 +161,15 @@ const styles = StyleSheet.create({
   spacingContainer: {
     marginTop: 16,
   },
-  mediaContainer: {
+  mediaContainerBase: {
     aspectRatio: 16 / 9,
     borderRadius: 10,
     marginHorizontal: 16,
+  },
+  mediaContainerLight: {},
+  mediaContainerDark: {
+    borderWidth: 1,
+    borderColor: 'black',
   },
   media: {
     width: '100%',

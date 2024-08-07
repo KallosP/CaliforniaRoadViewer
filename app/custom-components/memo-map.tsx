@@ -82,7 +82,7 @@ export const MemoizeMapView: React.FC<MemoizedMapViewProps> = React.memo(({cams,
   const [currMarkerType, setCurrMarkerType] = useState<MarkerType>();
   const [mTypeDisplay, setMTypeDisplay] = useState('All');
   // Percentage of screen bottom sheet takes up/snaps to
-  const snapPoints = useMemo(() => ["7%", "40%", "90%"], []);
+  const snapPoints = useMemo(() => ["6.5%", "40%", "90%"], []);
 
   const [bottomSheetIsOpen, setBottomSheetIsOpen] = useState(false);
   const [isOpening, setIsOpening] = useState(false);
@@ -350,7 +350,7 @@ export const MemoizeMapView: React.FC<MemoizedMapViewProps> = React.memo(({cams,
         >        
           <Ripple 
             onPress={() => {handleFilterPress('clear')}} 
-            style={[styles.filterButtonBase, isDarkMode ? styles.filterButtonXDark : styles.filterButtonX]}
+            style={[styles.filterButtonBase, isDarkMode ? [styles.filterButtonXDark, styles.filterButtonBaseDark] : [styles.filterButtonX, styles.filterButtonBaseLight]]}
             rippleContainerBorderRadius={20}
             rippleColor={GREEN_THEME_COLOR}
           >
@@ -360,7 +360,7 @@ export const MemoizeMapView: React.FC<MemoizedMapViewProps> = React.memo(({cams,
 
           <Ripple 
             onPress={() => {handleFilterPress('cctv')}} 
-            style={[styles.filterButtonBase, camPressed ? styles.filterButtonIn : (isDarkMode ? styles.filterButtonOutDark : styles.filterButtonOut)]}
+            style={[styles.filterButtonBase, isDarkMode ? styles.filterButtonBaseDark : styles.filterButtonBaseLight, camPressed ? styles.filterButtonIn : (isDarkMode ? styles.filterButtonOutDark : styles.filterButtonOut)]}
             rippleContainerBorderRadius={20}
             rippleColor={GREEN_THEME_COLOR}
           >
@@ -370,7 +370,7 @@ export const MemoizeMapView: React.FC<MemoizedMapViewProps> = React.memo(({cams,
 
           <Ripple 
             onPress={() => {handleFilterPress('lcsFull')}} 
-            style={[styles.filterButtonBase, lcsFullPressed ? styles.filterButtonIn : (isDarkMode ? styles.filterButtonOutDark : styles.filterButtonOut)]}
+            style={[styles.filterButtonBase, isDarkMode ? styles.filterButtonBaseDark : styles.filterButtonBaseLight, lcsFullPressed ? styles.filterButtonIn : (isDarkMode ? styles.filterButtonOutDark : styles.filterButtonOut)]}
             rippleContainerBorderRadius={20}
             rippleColor={GREEN_THEME_COLOR}
           >
@@ -379,7 +379,7 @@ export const MemoizeMapView: React.FC<MemoizedMapViewProps> = React.memo(({cams,
           </Ripple>
           <Ripple
             onPress={() => {handleFilterPress('lcsOther')}} 
-            style={[styles.filterButtonBase, lcsOtherPressed ? styles.filterButtonIn : (isDarkMode ? styles.filterButtonOutDark : styles.filterButtonOut)]}
+            style={[styles.filterButtonBase, isDarkMode ? styles.filterButtonBaseDark : styles.filterButtonBaseLight, lcsOtherPressed ? styles.filterButtonIn : (isDarkMode ? styles.filterButtonOutDark : styles.filterButtonOut)]}
             rippleContainerBorderRadius={20}
             rippleColor={GREEN_THEME_COLOR}
           >
@@ -388,7 +388,7 @@ export const MemoizeMapView: React.FC<MemoizedMapViewProps> = React.memo(({cams,
           </Ripple>
           <Ripple 
             onPress={() => {handleFilterPress('cc')}} 
-            style={[styles.filterButtonBase, ccPressed ? styles.filterButtonIn : (isDarkMode ? styles.filterButtonOutDark : styles.filterButtonOut)]}
+            style={[styles.filterButtonBase, isDarkMode ? styles.filterButtonBaseDark : styles.filterButtonBaseLight, ccPressed ? styles.filterButtonIn : (isDarkMode ? styles.filterButtonOutDark : styles.filterButtonOut)]}
             rippleContainerBorderRadius={20}
             rippleColor={GREEN_THEME_COLOR}
           >
@@ -397,7 +397,7 @@ export const MemoizeMapView: React.FC<MemoizedMapViewProps> = React.memo(({cams,
           </Ripple>
           <Ripple 
             onPress={() => {handleFilterPress('chpInc')}} 
-            style={[styles.filterButtonBase, chpIncPressed ? styles.filterButtonIn : (isDarkMode ? styles.filterButtonOutDark : styles.filterButtonOut)]}
+            style={[styles.filterButtonBase, isDarkMode ? styles.filterButtonBaseDark : styles.filterButtonBaseLight, chpIncPressed ? styles.filterButtonIn : (isDarkMode ? styles.filterButtonOutDark : styles.filterButtonOut)]}
             rippleContainerBorderRadius={20}
             rippleColor={GREEN_THEME_COLOR}
           >
@@ -412,7 +412,7 @@ export const MemoizeMapView: React.FC<MemoizedMapViewProps> = React.memo(({cams,
             {/* Toggle traffic button*/}
             <Ripple 
               onPress={() => {setTraffic(!showTraffic)}} 
-              style={[styles.miscButton, styles.filterButtonBase, showTraffic ? styles.filterButtonIn : (isDarkMode ? styles.filterButtonOutDark : styles.filterButtonOut)]}
+              style={[styles.miscButton, styles.filterButtonBase, isDarkMode ? styles.filterButtonBaseDark : styles.filterButtonBaseLight, showTraffic ? styles.filterButtonIn : (isDarkMode ? styles.filterButtonOutDark : styles.filterButtonOut)]}
               rippleContainerBorderRadius={20}
               rippleColor={GREEN_THEME_COLOR}
             >
@@ -421,7 +421,7 @@ export const MemoizeMapView: React.FC<MemoizedMapViewProps> = React.memo(({cams,
             {/* Center user button*/}
             <Ripple 
               onPress={() => {handleCenterUserPress()}} 
-              style={[styles.miscButton, styles.filterButtonBase, (isDarkMode ? styles.filterButtonOutDark : styles.filterButtonOut)]}
+              style={[styles.miscButton, styles.filterButtonBase, isDarkMode ? styles.filterButtonBaseDark : styles.filterButtonBaseLight, (isDarkMode ? styles.filterButtonOutDark : styles.filterButtonOut)]}
               rippleContainerBorderRadius={20}
               rippleColor={GREEN_THEME_COLOR}
             >
@@ -434,7 +434,7 @@ export const MemoizeMapView: React.FC<MemoizedMapViewProps> = React.memo(({cams,
             {/* Toggle dark mode button*/}
             <Ripple 
               onPress={() => {handleToggleTheme()/*setDarkMode(!isDarkMode)*/}} 
-              style={[styles.miscButton, styles.filterButtonBase, isDarkMode ? styles.filterButtonIn : (isDarkMode ? styles.filterButtonOutDark : styles.filterButtonOut)]}
+              style={[styles.miscButton, styles.filterButtonBase, isDarkMode ? styles.filterButtonBaseDark : styles.filterButtonBaseLight, isDarkMode ? styles.filterButtonIn : (isDarkMode ? styles.filterButtonOutDark : styles.filterButtonOut)]}
               rippleContainerBorderRadius={20}
               rippleColor={GREEN_THEME_COLOR}
             >
@@ -454,6 +454,7 @@ export const MemoizeMapView: React.FC<MemoizedMapViewProps> = React.memo(({cams,
         onClose={() => setBottomSheetIsOpen(false)}
         backgroundStyle={isDarkMode ? { backgroundColor: DARK_THEME_COLOR } : { backgroundColor: LIGHT_THEME_COLOR }}
         handleIndicatorStyle={isDarkMode ? { backgroundColor: 'white' } : { backgroundColor: 'black'}}
+        style={isDarkMode ? { borderWidth: 1, borderColor: 'black', borderRadius: 16 } : {}}
       >
           {/* TODO: Figure out how to pass isDarkMode without getting type error */}
           {currMarkerType?.type === 'cctv' ? <CctvDetail id={currMarkerType?.marker.id} cctv={currMarkerType?.marker.cctv} /*isDarkMode={isDarkMode}*//>
@@ -479,7 +480,7 @@ const styles = StyleSheet.create({
     paddingLeft: 0,
   },
   miscButtonContainer: {
-    marginTop: 20,
+//    marginTop: 20,
   },
   miscButton: {
     width: 50,
@@ -494,10 +495,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   filterContainer: {
-/*    position: 'absolute',
-    marginVertical: 45,
-    padding: 10,
-    paddingLeft: 0,*/
     flexDirection: 'row',
   },
   filterButtonBase: {
@@ -508,6 +505,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 10,
     marginHorizontal: 10,
+  },
+  filterButtonBaseDark: {
+    borderColor: 'black',
+    borderWidth: 1,
+    marginBottom: 10,
+  },
+  filterButtonBaseLight: {
+    marginBottom: 10,
+    shadowColor: "black",
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    elevation: 5,
   },
   filterButtonX: {
     backgroundColor: 'white',

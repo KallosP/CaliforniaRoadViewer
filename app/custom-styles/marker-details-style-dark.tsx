@@ -6,7 +6,8 @@ export default StyleSheet.create({
   detailsContainer: {
     ...MarkerDetailsStyleBase.detailsContainer,
     backgroundColor: DARK_THEME_COLOR,
-    shadowColor: 'white',
+    borderWidth: 1,
+    borderColor: 'black',
   },
   detailsTitle: {
     ...MarkerDetailsStyleBase.title,
