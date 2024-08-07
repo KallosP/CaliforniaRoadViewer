@@ -53,10 +53,10 @@ import darkMapStyle from '../../assets/darkMapStyle.json';
 import { MARKER_COLOR, GREEN_THEME_COLOR, DARK_THEME_COLOR, LIGHT_THEME_COLOR } from '../constants/theme-colors';
 
 const INITIAL_REGION = {
-  latitude: 37.33,
-  longitude: -122,
-  latitudeDelta: 2,
-  longitudeDelta: 2,
+  latitude: 36.59862922932531,
+  longitude: -119.86163764755294,
+  latitudeDelta: 10,
+  longitudeDelta: 10,
 }
 
 interface MemoizedMapViewProps {
@@ -280,7 +280,13 @@ export const MemoizeMapView: React.FC<MemoizedMapViewProps> = React.memo(({cams,
       return;
     }
 
-    let currentLocation = await Location.getCurrentPositionAsync({});
+    // Default to faster location request
+    let currentLocation = await Location.getLastKnownPositionAsync({});
+    // If results in null value, fall back to slower, more reliable (non-null) location request
+    if (!currentLocation) {
+      console.log('getting more time consuming location')
+      currentLocation = await Location.getCurrentPositionAsync({})
+    }
 
     const {latitude, longitude} = currentLocation.coords;
 
