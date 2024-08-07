@@ -1,19 +1,18 @@
-import { ActivityIndicator, StyleSheet, Text, View, Image } from "react-native";
+/*import { ActivityIndicator, StyleSheet, Text, View, Image } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { Video, ResizeMode } from 'expo-av';
 import React, { useEffect, useRef, RefObject} from 'react';
 import { CCTV } from "../custom-types/url-types";
-import MarkerDetailStyleBase from "../custom-styles/marker-details-style-base";
+import MarkerDetailsStyleBase from "../custom-styles/marker-details-style-base";
 import MarkerDetailsStyleDark from "../custom-styles/marker-details-style-dark";
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { TouchableOpacity } from "react-native-gesture-handler";
-import { useTheme } from '../custom-components/theme-context'; 
 
 // TODO: Add dark mode support (also for rest of detail screens)
 
 let keyCtr = 0;
 // NOTE: rough template of cctv details page, will change in future
-export default function CctvDetail({ cctv }: CCTV) { 
+export default function CctvDetail() { 
   // Variable for managing the display of live video or a recent image (used when video source exists)
   const [showVideo, setShowVideo] = React.useState(true);
   // Variable for allowing video (is based on whether or not a video source exists)
@@ -24,29 +23,26 @@ export default function CctvDetail({ cctv }: CCTV) {
   const [captionTextTop, setCaptionTextTop] = React.useState('Most Recent Image');
   // Dynamic caption text bottom 
   const [captionTextBottom, setCaptionTextBottom] = React.useState('Live Video');
-  const { isDarkMode } = useTheme();
+  const { isDarkMode, toggleTheme } = useTheme();
+  const themeStyles = isDarkMode ? MarkerDetailsStyleDark : MarkerDetailsStyleBase;
 
-  const themeStyle = isDarkMode ? MarkerDetailsStyleDark : MarkerDetailStyleBase;
 
-  const videoRef = useRef<Video | null>(null);
-
-  const videoSource = cctv.imageData.streamingVideoURL;
-  const imgSource = cctv.imageData.static.currentImageURL;
-  const county = cctv.location.county;
-  const locationName = cctv.location.locationName;
-  const nearbyPlace = cctv.location.nearbyPlace;
-  const latlng = `${cctv.location.latitude}, ${cctv.location.longitude}`;
-  const elevation = cctv.location.elevation;
-  const direction = cctv.location.direction;
-  const route = cctv.location.route;
-  const routeSuffix = cctv.location.routeSuffix;
-  const postmilePrefix = cctv.location.postmilePrefix;
-  const postmile = cctv.location.postmile;
-  const alignment = cctv.location.alignment;
-  const milepost = cctv.location.milepost;
+  const videoSource = ""
+  const county = ""
+  const locationName = ""
+  const nearbyPlace = ""
+  const latlng = ""
+  const elevation = ""
+  const direction = ''
+  const route = ''
+  const routeSuffix = ''
+  const postmilePrefix = ''
+  const postmile = ''
+  const alignment = ''
+  const milepost = ''
 
   const renderDetailText = (label: string, value: string) => (
-    <Text style={themeStyle.detailsText}>
+    <Text style={themeStyles.detailsText}>
       {label}: {value ? value : <Text style={{ fontStyle: 'italic' }}>Not Available</Text>}
     </Text>
   );
@@ -80,42 +76,22 @@ export default function CctvDetail({ cctv }: CCTV) {
 
   return (
     <>
-      <View style={isDarkMode ? MarkerDetailsStyleDark.titleContainer : themeStyle.titleContainer}>
-        <Text style={themeStyle.title}>CCTV</Text>
+      <View style={themeStyles.titleContainer}>
+        <Text style={themeStyles.title}>CCTV</Text>
 
         {!allowVideo && (
-          <Text style={themeStyle.cctvText}>
+          <Text style={themeStyles.cctvText}>
             No live video available for this camera.
           </Text>
         )}
 
       </View>
 
-      <View style={themeStyle.divider}/>
+      <View style={themeStyles.divider}/>
 
       <BottomSheetScrollView>
         <View style={styles.spacingContainer}>
           <View style={styles.mediaContainer}>
-            {(showVideo && allowVideo) ? (
-              <Video
-                key={++keyCtr}
-                ref={videoRef}
-                source={{ uri: videoSource }}
-                style={styles.media}
-                useNativeControls={true}
-                shouldPlay={true}
-                isLooping={true}
-                resizeMode={ResizeMode.STRETCH}
-              >
-                <ActivityIndicator size="small" />
-              </Video>
-            ) : (
-              <Image
-                source={{ uri: imgSource }}
-                style={styles.media}
-                resizeMode="stretch"
-              />
-            )}
             <View style={styles.captionContainer}>
               <TouchableOpacity disabled={disableButton} style={[styles.buttonCaptionDisabled, disableButton ? styles.buttonCaptionDisabled : styles.buttonCaption]} onPress={() => disableButton ? alert("Video not available") : handleCaptionButtonPress()}>
                 <Text style={styles.buttonCaptionText}>
@@ -130,8 +106,8 @@ export default function CctvDetail({ cctv }: CCTV) {
           </View>
         </View>
 
-        <View style={themeStyle.detailsContainer}>
-          <Text style={themeStyle.detailsTitle}>Details</Text>
+        <View style={themeStyles.detailsContainer}>
+          <Text style={themeStyles.detailsTitle}>Details</Text>
           {renderDetailText("Location", locationName)}
           {renderDetailText("County", county)}
           {renderDetailText("Nearby Place", nearbyPlace)}
@@ -197,4 +173,4 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     
   },
-});
+});*/

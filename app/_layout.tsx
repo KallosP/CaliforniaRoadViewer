@@ -1,6 +1,6 @@
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Drawer } from 'expo-router/drawer';
-import CustomDrawer from './custom-components/custom-drawer';
+//import CustomDrawer from './custom-components/custom-drawer';
 import React, { useState } from 'react';
 import { Stack } from 'expo-router';
 
@@ -28,7 +28,13 @@ export default function Layout() {
                     }}
                 />
                 <Stack.Screen
-                    name="custom-styles/marker-details-style"
+                    name="custom-styles/marker-details-style-base"
+                    options={{
+                        headerShown: false,
+                    }}
+                />
+                <Stack.Screen
+                    name="custom-styles/marker-details-style-dark"
                     options={{
                         headerShown: false,
                     }}

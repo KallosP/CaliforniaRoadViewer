@@ -1,4 +1,4 @@
-import { StyleSheet, View, Text, Image} from 'react-native';
+/*import { StyleSheet, View, Text, Image} from 'react-native';
 import { useState } from 'react';
 import CheckboxComponent from './custom-checkbox';
 
@@ -34,12 +34,12 @@ export default function CustomDrawer() {
   return (
 
     <View style={styles.container}>
-      {/* Header Image */}
+      {/* Header Image }
       <View style={styles.headerImageContainer}>
         <Image style={styles.headerImage} source={require('../../assets/icon.png')} />
       </View>
 
-      {/* Tools/Pages Section */}
+      {/* Tools/Pages Section }
       <View style={styles.navAndToolsContainer}>
 
         <CheckboxComponent 
@@ -94,4 +94,4 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginHorizontal: 10,
   },
-});
+});*/

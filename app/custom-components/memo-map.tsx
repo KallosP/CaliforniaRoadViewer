@@ -1,13 +1,19 @@
+// React
 import React, { useRef, useState, useMemo, useEffect, useCallback } from 'react';
 import { Marker, MarkerAnimated, PROVIDER_GOOGLE } from 'react-native-maps';
+import { StatusBar, Alert, Linking, Animated, StyleSheet, View, Text, Image, Button, ScrollView, Pressable} from 'react-native';
+// Clustering
 import MapView from "react-native-map-clustering";
-import { Alert, Linking, Animated, StyleSheet, View, Text, Image, Button, ScrollView, Pressable} from 'react-native';
+// Bottom Sheet
 import  BottomSheetModal, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
+// Marker Types
 import { CCTV, LCS, CC, CHP } from "../custom-types/url-types";
 import CctvDetail from "../marker-details/cctv-details";
+//import CctvDetailDebug from "../marker-details/cctv-details-debug";
 import LcsDetail from "../marker-details/lcs-details";
 import CcDetail from "../marker-details/cc-details";
 import ChpDetail from "../marker-details/chp-details";
+// Light
 import XIcon from '../../assets/x_icon.svg';
 import CctvIcon from '../../assets/cctv_icon.svg';
 import FullLcsIcon from '../../assets/full_lcs_icon.svg';
@@ -23,8 +29,28 @@ import FullMarkerIcon from '../../assets/full_marker.svg';
 import OtherMarkerIcon from '../../assets/other_marker.svg';
 import CCMarkerIcon from '../../assets/cc_marker.svg';
 import ChpMarkerIcon from '../../assets/chp_marker.svg';
+// Dark
+import XIconDark from '../../assets/x_dark_icon.svg';
+import CctvIconDark from '../../assets/cctv_dark_icon.svg';
+import FullLcsIconDark from '../../assets/full_closure_dark_icon.svg';
+import OtherLcsIconDark  from '../../assets/other_dark_icon.svg';
+import TrafficIconDark  from '../../assets/traffic_dark_icon.svg';
+import SunIconDark  from '../../assets/sun_dark_icon.svg'
+import CenterUserIconDark  from '../../assets/center_user_dark_icon.svg'
+import CCIconDark  from '../../assets/cc_dark_icon.svg';
+import ChpIconDark  from '../../assets/chp_dark_icon.svg';
+import CctvMarkerIconDark from '../../assets/cam_marker_dark.svg';
+import FullMarkerIconDark from '../../assets/full_marker_dark.svg';
+import OtherMarkerIconDark  from '../../assets/other_marker_dark.svg';
+import CCMarkerIconDark  from '../../assets/cc_marker_dark.svg';
+import ChpMarkerIconDark  from '../../assets/chp_marker_dark.svg';
+// Location
 import * as Location from 'expo-location';
 import LocationPermissionsModal from '../custom-components/permissions-modal';
+import { useTheme } from './theme-context'; // Adjust import path
+import lightMapStyle from '../../assets/lightMapStyle.json';
+import darkMapStyle from '../../assets/darkMapStyle.json';
+import { MARKER_COLOR, GREEN_THEME_COLOR, DARK_THEME_COLOR, LIGHT_THEME_COLOR } from '../constants/theme-colors';
 
 const INITIAL_REGION = {
   latitude: 37.33,
@@ -46,7 +72,6 @@ type MarkerType = { type: 'cctv'; marker: CCTV; } | { type: 'lcsFull'; marker: L
                 | { type: 'chpInc'; marker: CHP; }
 
 // Main color for all markers/filters
-const MARKER_COLOR = '#50FFB3';
 
 // Incremented then assigned to component keys for always unique keys
 var keyCtr = 0;
@@ -69,9 +94,16 @@ export const MemoizeMapView: React.FC<MemoizedMapViewProps> = React.memo(({cams,
   const [chpIncPressed, setChpIncPressed] = useState(false);
 
   const [showTraffic, setTraffic] = useState(false);
-  const [isDarkMode, setDarkMode] = useState(false);
+ // const [isDarkMode, setDarkMode] = useState(false);
   const mapRef = useRef(null);
   const [isModalVisible, setModalVisible] = useState(false);
+
+  const [forceUpdate, setForceUpdate] = useState(0);
+  const { isDarkMode, toggleTheme } = useTheme();
+
+  StatusBar.setTranslucent(true);
+  StatusBar.setBarStyle(isDarkMode ? 'light-content' : 'dark-content');
+
 
 //  const markerScales = React.useRef<{ [key: number]: Animated.Value }>({});
 //
@@ -144,11 +176,12 @@ export const MemoizeMapView: React.FC<MemoizedMapViewProps> = React.memo(({cams,
     }
   }
 
+
   // CCTV Markers
   const displayCamMarkers = useMemo(() => {
     return cams.flatMap((currCam: CCTV, index: number) => (
       <Marker
-        key={++keyCtr}
+        key={++keyCtr + (isDarkMode ? 'dark' : 'light')}
         coordinate={{latitude: parseFloat(currCam.cctv.location.latitude), longitude: parseFloat(currCam.cctv.location.longitude)}}
         onPress={() => {let camAsMarkerType: MarkerType = {type: 'cctv', marker: currCam}; handleMarkerPress(camAsMarkerType)}}
         pinColor={MARKER_COLOR}
@@ -160,11 +193,11 @@ export const MemoizeMapView: React.FC<MemoizedMapViewProps> = React.memo(({cams,
             transform: [{scale: markerScales.current[currCam.id]}]
           }}
         >*/}
-          <CctvMarkerIcon />
+          {isDarkMode ? <CctvMarkerIconDark /> : <CctvMarkerIcon />}
         {/*</Marker></Animated.View>*/}
       </Marker>
   ))
-  }, [cams]);
+  }, [cams, forceUpdate]);
 
   // LCS (Full Closure) Markers
   const displayLcsFullMarkers = useMemo(() => {
@@ -176,10 +209,10 @@ export const MemoizeMapView: React.FC<MemoizedMapViewProps> = React.memo(({cams,
       pinColor={MARKER_COLOR}
       tracksViewChanges={false}
     >
-      <FullMarkerIcon />
+      {isDarkMode ? <FullMarkerIconDark /> : <FullMarkerIcon />} 
     </Marker>
   ))
-  }, [lcsFull]);
+  }, [lcsFull, forceUpdate]);
 
   // LCS (Other Closure) Markers
   const displayLcsOtherMarkers = useMemo(() => {
@@ -191,10 +224,10 @@ export const MemoizeMapView: React.FC<MemoizedMapViewProps> = React.memo(({cams,
       pinColor={MARKER_COLOR}
       tracksViewChanges={false}
     >
-      <OtherMarkerIcon />
+      {isDarkMode ? <OtherMarkerIconDark /> : <OtherMarkerIcon />}
     </Marker>
   ))
-  }, [lcsOther]);
+  }, [lcsOther, forceUpdate]);
 
   // CC (Chain Control) Markers
   const displayCCMarkers = useMemo(() => {
@@ -206,10 +239,10 @@ export const MemoizeMapView: React.FC<MemoizedMapViewProps> = React.memo(({cams,
       pinColor={MARKER_COLOR}
       tracksViewChanges={false}
     >
-      <CCMarkerIcon />
+      {isDarkMode ? <CCMarkerIconDark /> : <CCMarkerIcon />}
     </Marker>
   ))
-  }, [cc]);
+  }, [cc, forceUpdate]);
 
   // CHP (CHP Incident) Markers
   const displayChpIncMarkers = useMemo(() => {
@@ -221,10 +254,10 @@ export const MemoizeMapView: React.FC<MemoizedMapViewProps> = React.memo(({cams,
       pinColor={MARKER_COLOR}
       tracksViewChanges={false}
     >
-      <ChpMarkerIcon />
+      {isDarkMode ? <ChpMarkerIconDark /> : <ChpMarkerIcon />}
     </Marker>
   ))
-  }, [chpIncs]);
+  }, [chpIncs, forceUpdate]);
 
   // Called/re-rendered whenever a filter is pressed
   // Renders all markers that are being filtered
@@ -237,7 +270,7 @@ export const MemoizeMapView: React.FC<MemoizedMapViewProps> = React.memo(({cams,
     if (chpIncPressed) markersArr = markersArr.concat(displayChpIncMarkers);
 
     return markersArr;
-  }, [camPressed, lcsFullPressed, lcsOtherPressed, ccPressed, chpIncPressed]);
+  }, [camPressed, lcsFullPressed, lcsOtherPressed, ccPressed, chpIncPressed, forceUpdate]);
 
   const handleCenterUserPress = async () => {
 
@@ -265,11 +298,18 @@ export const MemoizeMapView: React.FC<MemoizedMapViewProps> = React.memo(({cams,
       alert('Something went wrong...')
   }
 
+  const handleToggleTheme = () => {
+    toggleTheme();
+    setForceUpdate(prev => prev + 1 );
+  }
+
   return (
     <>
       <MapView
+        key={forceUpdate}
         ref={mapRef}
         style={styles.map}
+        customMapStyle={isDarkMode ? darkMapStyle : lightMapStyle}
         provider={PROVIDER_GOOGLE}
         initialRegion={INITIAL_REGION}
         radius={100}
@@ -304,53 +344,59 @@ export const MemoizeMapView: React.FC<MemoizedMapViewProps> = React.memo(({cams,
         >        
           <Ripple 
             onPress={() => {handleFilterPress('clear')}} 
-            style={[styles.filterButtonBase, styles.filterButtonX]}
+            style={[styles.filterButtonBase, isDarkMode ? styles.filterButtonXDark : styles.filterButtonX]}
             rippleContainerBorderRadius={20}
+            rippleColor={GREEN_THEME_COLOR}
           >
-              <XIcon height={15} width={15} style={styles.filterIcon}/>
-              <Text style={styles.filterText}>Clear</Text>
+              {isDarkMode ? <XIconDark height={15} width={15} style={styles.filterIcon}/> : <XIcon height={15} width={15} style={styles.filterIcon}/>}
+              <Text style={isDarkMode ? styles.filterTextDark : styles.filterText}>Clear</Text>
           </Ripple>
 
           <Ripple 
             onPress={() => {handleFilterPress('cctv')}} 
-            style={[styles.filterButtonBase, camPressed ? styles.filterButtonIn : styles.filterButtonOut]}
+            style={[styles.filterButtonBase, camPressed ? styles.filterButtonIn : (isDarkMode ? styles.filterButtonOutDark : styles.filterButtonOut)]}
             rippleContainerBorderRadius={20}
+            rippleColor={GREEN_THEME_COLOR}
           >
-            <CctvIcon height={15} width={15} style={styles.filterIcon}/>
-            <Text style={styles.filterText}>Cameras</Text>
+            {isDarkMode ? <CctvIconDark height={15} width={15} style={styles.filterIcon}/> : <CctvIcon height={15} width={15} style={styles.filterIcon}/>}
+            <Text style={isDarkMode ? styles.filterTextDark : styles.filterText}>Cameras</Text>
           </Ripple>
 
           <Ripple 
             onPress={() => {handleFilterPress('lcsFull')}} 
-            style={[styles.filterButtonBase, lcsFullPressed ? styles.filterButtonIn : styles.filterButtonOut]}
+            style={[styles.filterButtonBase, lcsFullPressed ? styles.filterButtonIn : (isDarkMode ? styles.filterButtonOutDark : styles.filterButtonOut)]}
             rippleContainerBorderRadius={20}
+            rippleColor={GREEN_THEME_COLOR}
           >
-            <FullLcsIcon height={15} width={15} style={styles.filterIcon}/>
-            <Text style={styles.filterText}>Full Closures</Text>
+            {isDarkMode ? <FullLcsIconDark height={15} width={15} style={styles.filterIcon}/> : <FullLcsIcon height={15} width={15} style={styles.filterIcon}/>}
+            <Text style={isDarkMode ? styles.filterTextDark : styles.filterText}>Full Closures</Text>
           </Ripple>
           <Ripple
             onPress={() => {handleFilterPress('lcsOther')}} 
-            style={[styles.filterButtonBase, lcsOtherPressed ? styles.filterButtonIn : styles.filterButtonOut]}
+            style={[styles.filterButtonBase, lcsOtherPressed ? styles.filterButtonIn : (isDarkMode ? styles.filterButtonOutDark : styles.filterButtonOut)]}
             rippleContainerBorderRadius={20}
+            rippleColor={GREEN_THEME_COLOR}
           >
-            <OtherLcsIcon height={15} width={15} style={styles.filterIcon}/>
-            <Text style={styles.filterText}>Other Closures</Text>
+            {isDarkMode ? <OtherLcsIconDark height={15} width={15} style={styles.filterIcon}/> : <OtherLcsIcon height={15} width={15} style={styles.filterIcon}/>}
+            <Text style={isDarkMode ? styles.filterTextDark : styles.filterText}>Other Closures</Text>
           </Ripple>
           <Ripple 
             onPress={() => {handleFilterPress('cc')}} 
-            style={[styles.filterButtonBase, ccPressed ? styles.filterButtonIn : styles.filterButtonOut]}
+            style={[styles.filterButtonBase, ccPressed ? styles.filterButtonIn : (isDarkMode ? styles.filterButtonOutDark : styles.filterButtonOut)]}
             rippleContainerBorderRadius={20}
+            rippleColor={GREEN_THEME_COLOR}
           >
-            <CCIcon height={15} width={15} style={styles.filterIcon}/>
-            <Text style={styles.filterText}>Chain Control</Text>
+            {isDarkMode ? <CCIconDark height={15} width={15} style={styles.filterIcon}/> : <CCIcon height={15} width={15} style={styles.filterIcon}/>}
+            <Text style={isDarkMode ? styles.filterTextDark : styles.filterText}>Chain Control</Text>
           </Ripple>
           <Ripple 
             onPress={() => {handleFilterPress('chpInc')}} 
-            style={[styles.filterButtonBase, chpIncPressed ? styles.filterButtonIn : styles.filterButtonOut]}
+            style={[styles.filterButtonBase, chpIncPressed ? styles.filterButtonIn : (isDarkMode ? styles.filterButtonOutDark : styles.filterButtonOut)]}
             rippleContainerBorderRadius={20}
+            rippleColor={GREEN_THEME_COLOR}
           >
-            <ChpIcon height={15} width={15} style={styles.filterIcon}/>
-            <Text style={styles.filterText}>CHP Incidents</Text>
+            {isDarkMode ? <ChpIconDark height={15} width={15} style={styles.filterIcon}/> : <ChpIcon height={15} width={15} style={styles.filterIcon}/>}
+            <Text style={isDarkMode ? styles.filterTextDark : styles.filterText}>CHP Incidents</Text>
           </Ripple>
         </ScrollView>
 
@@ -360,18 +406,20 @@ export const MemoizeMapView: React.FC<MemoizedMapViewProps> = React.memo(({cams,
             {/* Toggle traffic button*/}
             <Ripple 
               onPress={() => {setTraffic(!showTraffic)}} 
-              style={[styles.miscButton, styles.filterButtonBase, showTraffic ? styles.filterButtonIn : styles.filterButtonOut]}
+              style={[styles.miscButton, styles.filterButtonBase, showTraffic ? styles.filterButtonIn : (isDarkMode ? styles.filterButtonOutDark : styles.filterButtonOut)]}
               rippleContainerBorderRadius={20}
+              rippleColor={GREEN_THEME_COLOR}
             >
-              <TrafficIcon />
+              {isDarkMode ? <TrafficIconDark /> : <TrafficIcon />}
             </Ripple>
             {/* Center user button*/}
             <Ripple 
               onPress={() => {handleCenterUserPress()}} 
-              style={[styles.miscButton, styles.filterButtonBase, styles.filterButtonOut]}
+              style={[styles.miscButton, styles.filterButtonBase, (isDarkMode ? styles.filterButtonOutDark : styles.filterButtonOut)]}
               rippleContainerBorderRadius={20}
+              rippleColor={GREEN_THEME_COLOR}
             >
-              <CenterUserIcon />
+              {isDarkMode ? <CenterUserIconDark /> : <CenterUserIcon />}
             </Ripple>
           </View>
 
@@ -379,11 +427,12 @@ export const MemoizeMapView: React.FC<MemoizedMapViewProps> = React.memo(({cams,
           <View style={styles.miscButtonsRow}>
             {/* Toggle dark mode button*/}
             <Ripple 
-              onPress={() => {setDarkMode(!isDarkMode)}} 
-              style={[styles.miscButton, styles.filterButtonBase, isDarkMode ? styles.filterButtonIn : styles.filterButtonOut]}
+              onPress={() => {handleToggleTheme()/*setDarkMode(!isDarkMode)*/}} 
+              style={[styles.miscButton, styles.filterButtonBase, isDarkMode ? styles.filterButtonIn : (isDarkMode ? styles.filterButtonOutDark : styles.filterButtonOut)]}
               rippleContainerBorderRadius={20}
+              rippleColor={GREEN_THEME_COLOR}
             >
-              <SunIcon />
+              {isDarkMode ? <SunIconDark /> : <SunIcon />}
             </Ripple>
           </View>
 
@@ -397,12 +446,15 @@ export const MemoizeMapView: React.FC<MemoizedMapViewProps> = React.memo(({cams,
         // Initiate bottom sheet in closed state
         index={-1}
         onClose={() => setBottomSheetIsOpen(false)}
+        backgroundStyle={isDarkMode ? { backgroundColor: DARK_THEME_COLOR } : { backgroundColor: LIGHT_THEME_COLOR }}
+        handleIndicatorStyle={isDarkMode ? { backgroundColor: 'white' } : { backgroundColor: 'black'}}
       >
-          {currMarkerType?.type === 'cctv' ? <CctvDetail id={currMarkerType?.marker.id} cctv={currMarkerType?.marker.cctv}/>
-          : currMarkerType?.type === 'lcsFull' ? <LcsDetail id={currMarkerType?.marker.id} lcs={currMarkerType?.marker.lcs}/>
-          : currMarkerType?.type === 'lcsOther' ? <LcsDetail id={currMarkerType?.marker.id} lcs={currMarkerType?.marker.lcs}/>
-          : currMarkerType?.type === 'cc' ? <CcDetail id={currMarkerType?.marker.id} cc={currMarkerType?.marker.cc}/>
-          : currMarkerType?.type === 'chpInc' ? <ChpDetail log={currMarkerType?.marker.center[0].dispatch[0].log}/>
+          {/* TODO: Figure out how to pass isDarkMode without getting type error */}
+          {currMarkerType?.type === 'cctv' ? <CctvDetail id={currMarkerType?.marker.id} cctv={currMarkerType?.marker.cctv} /*isDarkMode={isDarkMode}*//>
+          : currMarkerType?.type === 'lcsFull' ? <LcsDetail id={currMarkerType?.marker.id} lcs={currMarkerType?.marker.lcs} /*isDarkMode={isDarkMode}*//>
+          : currMarkerType?.type === 'lcsOther' ? <LcsDetail id={currMarkerType?.marker.id} lcs={currMarkerType?.marker.lcs} /*isDarkMode={isDarkMode}*//>
+          : currMarkerType?.type === 'cc' ? <CcDetail id={currMarkerType?.marker.id} cc={currMarkerType?.marker.cc} /*isDarkMode={isDarkMode}*//>
+          : currMarkerType?.type === 'chpInc' ? <ChpDetail log={currMarkerType?.marker.center[0].dispatch[0].log} /*isDarkMode={isDarkMode}*//>
           : <Text>No Data Available</Text>
           }
           
@@ -454,11 +506,17 @@ const styles = StyleSheet.create({
   filterButtonX: {
     backgroundColor: 'white',
   },
+  filterButtonXDark: {
+    backgroundColor: DARK_THEME_COLOR,
+  },
   filterButtonIn: {
     backgroundColor: MARKER_COLOR,
   },
   filterButtonOut: {
     backgroundColor: 'white', 
+  },
+  filterButtonOutDark: {
+    backgroundColor: DARK_THEME_COLOR, 
   },
   filterIcon: {
     marginRight: 10,
@@ -467,5 +525,9 @@ const styles = StyleSheet.create({
   },
   filterText: {
     fontSize: 15,
+  },
+  filterTextDark: {
+    fontSize: 15,
+    color: 'white',
   }
 });

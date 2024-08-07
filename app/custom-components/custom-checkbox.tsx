@@ -1,4 +1,4 @@
-import React from 'react';
+/*import React from 'react';
 import { TouchableOpacity, Text, StyleSheet } from 'react-native';
 import UncheckedBox from '../../assets/checkbox-unchecked.svg';
 import CheckedBox from '../../assets/checkbox-checked.svg';
@@ -40,3 +40,4 @@ const styles = StyleSheet.create({
 });
 
 export default CheckboxComponent;
+*/

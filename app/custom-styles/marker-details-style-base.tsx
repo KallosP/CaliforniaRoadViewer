@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native";
 
-export default StyleSheet.create({
+const MarkerDetailsStyleBase = StyleSheet.create({
   detailsContainer: {
     padding: 16,
     backgroundColor: 'white',
@@ -47,3 +47,5 @@ export default StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
 });
+
+export default MarkerDetailsStyleBase;

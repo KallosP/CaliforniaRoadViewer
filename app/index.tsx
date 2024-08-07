@@ -1,14 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { View, StatusBar, TextInput, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, TextInput, StyleSheet, ActivityIndicator } from 'react-native';
 import { MemoizeMapView } from './custom-components/memo-map';
 import { CCTV, LCS, CC, CHP } from './custom-types/url-types';
-
-// Sets status bar style
-function setStatusBar() {
-  // TODO: Check if this works on IOS
-  StatusBar.setBackgroundColor('white');
-  StatusBar.setBarStyle('dark-content');
-}
+import { ThemeProvider, useTheme } from './custom-components/theme-context';
 
 async function fetchAllData(urlType: string, urlArr: string[]) {
   try {
@@ -53,8 +47,9 @@ export default function HomeScreen() {
   /*
     TODO: 
 
-          - Live feed substitute for current image (if live feed is in service)
-          - Dark theme
+          - Dark theme 
+          - FIX BUG with live video and most recent image buttons being swapped on initial load 
+            after loading a marker that has no live video available
           - Apple Dev Creation
 
           - Organize details page data to be more readable for all types of data
@@ -66,7 +61,7 @@ export default function HomeScreen() {
           - Add loading icon on app startup for data fetching as fetch goes through cams, then lcs, etc. Loading message
             and confirmation message for when all data/markers have been loaded
           - Add other caltrans data (lane closures, chain control, etc)
-          - For live feeds that are in service but don't play, detect it somehow and show current image instead
+          - (DONE) For live feeds that are in service but don't play, detect it somehow and show current image instead
             (go to fresno (districty 6), a lot of them are there; look into making the thumbnail of videos 
             default to current image? possible?)
           - Decide on info to put under cam video/image
@@ -76,8 +71,6 @@ export default function HomeScreen() {
           - Clean up UI
           - Generate new Google Maps API key before publishing to app store 
           - ...*/
-
-  setStatusBar();
 
   // Storing data from all districts in CA
   useEffect(() => {
@@ -248,7 +241,7 @@ const transformToCHPArray = (data: any): CHP[] => {
 
 
   return (
-    <>
+    <ThemeProvider>
 
       <MemoizeMapView
         cams={cams}
@@ -261,7 +254,7 @@ const transformToCHPArray = (data: any): CHP[] => {
       {isLoading && (
         <ActivityIndicator color="#50FFB3" size={100} style={styles.activityIndicator} />
       )}
-    </>
+    </ThemeProvider>
   );
 }
 
