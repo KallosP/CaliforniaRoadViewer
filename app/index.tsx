@@ -48,28 +48,22 @@ export default function HomeScreen() {
 
   /*
     TODO: 
+          - Features:
+          1) Settings Page (match theme with device, terms of service, contact us, resources (caltrans, chp), notifications, support the developer etc) 
+          2) Notifications
+          3) Ads placement
+          4) Premium version (no ads, notifications, faster load times??)
+          5) Search? (can't find highway conditions, alternative could be searching a district/anywhere in california)?
+          6) App logo, startup screen
+          7) Loading screen while data is being fetched (loading bar?)
 
+          !!! Generate new Google Maps API key before publishing to app store !!!
+
+          - Custom Compass?? (currently just disabled)
+          - Cctv video player styling/ or just hide it, allow for maximizing video?
+          - Optimization (need to fix this)
           - Apple Dev Creation
-
-          - Organize details page data to be more readable for all types of data
-          - Figure out how to access highway condition search data and integrate
-          - (DONE) MAINTAIN state of map when navigating to cctv page and navigating back, don't re-render the whole home/map page
-          - (DONE) IMPROVE PERFORMANCE OF LOADING PAGES
-          - (DONE - no need, removed unnecessary marker types) FIGURE OUT HOW TO HANDLE Tens of thousands of markers, clustering glitches out after adding third type (CCs). come up
-            with strategy for best possible fix/way to handle this
-          - Add loading icon on app startup for data fetching as fetch goes through cams, then lcs, etc. Loading message
-            and confirmation message for when all data/markers have been loaded
-          - Add other caltrans data (lane closures, chain control, etc)
-          - (DONE) For live feeds that are in service but don't play, detect it somehow and show current image instead
-            (go to fresno (districty 6), a lot of them are there; look into making the thumbnail of videos 
-            default to current image? possible?)
-          - Decide on info to put under cam video/image
-          - Implement highway search for highway conditions
-          - Resize camera feeds/images if too small (maybe make a button that the user presses which tries to resize the cctv)
-          - Add custom loading icon for app startup/app logo
-          - Clean up UI
-          - Generate new Google Maps API key before publishing to app store 
-          - ...*/
+*/
 
   // Storing data from all districts in CA
   useEffect(() => {

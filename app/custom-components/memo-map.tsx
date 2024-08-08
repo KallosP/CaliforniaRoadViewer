@@ -335,8 +335,7 @@ export const MemoizeMapView: React.FC<MemoizedMapViewProps> = React.memo(({cams,
         showsTraffic={showTraffic}
         onTouchStart={() => {handleMapPress()}}
         clusterColor={MARKER_COLOR}
-        // TODO: figure out why not displaying user location
-        // Need to enable location permissions, otherwise fails silently
+        showsCompass={false}
         showsUserLocation={true}
         showsMyLocationButton={false}
         >
