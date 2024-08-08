@@ -33,9 +33,6 @@ export default function ChpDetail({ log }: CHPLog) {
                 {renderDetailText("Location", log[0].location)}
                 {renderDetailText("Location Desc", log[0].locationDesc)}
                 {renderDetailText("Area", log[0].area)}
-                {renderDetailText("Thomas Brothers", log[0].thomasBrothers)}
-                {renderDetailText("Latitude", log[0].lat)}
-                {renderDetailText("Longitude", log[0].long)}
                 {log[0].logDetails[0].details.map((detail, index) => (
                   <View key={index}>
                     {renderDetailText("Detail Time", detail.detailTime)}

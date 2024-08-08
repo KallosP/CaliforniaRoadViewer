@@ -14,6 +14,14 @@ const lightModal = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 10,
     alignItems: 'center',
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   title: {
     fontSize: 18,
@@ -37,6 +45,14 @@ const lightModal = StyleSheet.create({
     borderRadius: 5,
     marginHorizontal: 5,
     backgroundColor: GREEN_THEME_COLOR,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 3,
   },
   buttonText: {
     color: 'white',

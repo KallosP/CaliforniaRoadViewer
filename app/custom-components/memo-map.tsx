@@ -29,6 +29,7 @@ import FullMarkerIcon from '../../assets/full_marker.svg';
 import OtherMarkerIcon from '../../assets/other_marker.svg';
 import CCMarkerIcon from '../../assets/cc_marker.svg';
 import ChpMarkerIcon from '../../assets/chp_marker.svg';
+import EndMarkerIcon from '../../assets/end_marker.svg';
 // Dark
 import XIconDark from '../../assets/x_dark_icon.svg';
 import CctvIconDark from '../../assets/cctv_dark_icon.svg';
@@ -44,6 +45,7 @@ import FullMarkerIconDark from '../../assets/full_marker_dark.svg';
 import OtherMarkerIconDark  from '../../assets/other_marker_dark.svg';
 import CCMarkerIconDark  from '../../assets/cc_marker_dark.svg';
 import ChpMarkerIconDark  from '../../assets/chp_marker_dark.svg';
+import EndMarkerIconDark from '../../assets/end_marker_dark.svg';
 // Location
 import * as Location from 'expo-location';
 import LocationPermissionsModal from '../custom-components/permissions-modal';
@@ -75,8 +77,13 @@ type MarkerType = { type: 'cctv'; marker: CCTV; } | { type: 'lcsFull'; marker: L
 
 // Incremented then assigned to component keys for always unique keys
 var keyCtr = 0;
+let renderCtr = 0;
 // Memoizing map view for performance improvement (otherwise map along with all markers re-renders every time; slows down app)
 export const MemoizeMapView: React.FC<MemoizedMapViewProps> = React.memo(({cams, cc, lcsFull, lcsOther, chpIncs}) => {
+
+  //console.log(++renderCtr)
+
+  //console.log(cams.length + lcsFull.length + lcsOther.length + cc.length + chpIncs.length) 
 
   const sheetRef = useRef<BottomSheetModal>(null);
   const [currMarkerType, setCurrMarkerType] = useState<MarkerType>();
@@ -143,8 +150,8 @@ export const MemoizeMapView: React.FC<MemoizedMapViewProps> = React.memo(({cams,
   const handleFilterPress = (markerType: string) => {
     // Check/set pressed state for all filter buttons
     if (markerType === 'cctv') !camPressed ? setCamPressed(true) : setCamPressed(false);
-    if (markerType === 'lcsFull') !lcsFullPressed ? setLcsFullPressed(true) : setLcsFullPressed(false);
-    if (markerType === 'lcsOther') !lcsOtherPressed ? setLcsOtherPressed(true) : setLcsOtherPressed(false);
+    if (markerType === 'lcsFull') !lcsFullPressed ? setLcsFullPressed(true) : (setLcsFullPressed(false), setEndLocation(null));
+    if (markerType === 'lcsOther') !lcsOtherPressed ? setLcsOtherPressed(true) : (setLcsOtherPressed(false), setEndLocation(null));
     if (markerType === 'cc') !ccPressed ? setCCPressed(true) : setCCPressed(false);
     if (markerType === 'chpInc') !chpIncPressed ? setChpIncPressed(true) : setChpIncPressed(false);
     // Clear all filters
@@ -309,6 +316,8 @@ export const MemoizeMapView: React.FC<MemoizedMapViewProps> = React.memo(({cams,
     setForceUpdate(prev => prev + 1 );
   }
 
+  const [endLocation, setEndLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+
   return (
     <>
       <MapView
@@ -321,7 +330,7 @@ export const MemoizeMapView: React.FC<MemoizedMapViewProps> = React.memo(({cams,
         radius={100}
         minPoints={4}
         extent={512}
-        maxZoom={10}
+        maxZoom={12}
         moveOnMarkerPress={false}
         showsTraffic={showTraffic}
         onTouchStart={() => {handleMapPress()}}
@@ -333,6 +342,16 @@ export const MemoizeMapView: React.FC<MemoizedMapViewProps> = React.memo(({cams,
         >
 
           {getMarkers()}
+          {/* TODO: remove this marker when full closure is deselected, same for other closure */ }
+          {endLocation && (
+            <Marker
+              coordinate={endLocation}
+              tracksViewChanges={false}
+              onPress={() => {}}
+            >
+              {isDarkMode ? <EndMarkerIconDark /> : <EndMarkerIcon />}
+            </Marker>
+          )}
 
       </MapView> 
 
@@ -454,14 +473,14 @@ export const MemoizeMapView: React.FC<MemoizedMapViewProps> = React.memo(({cams,
         onClose={() => setBottomSheetIsOpen(false)}
         backgroundStyle={isDarkMode ? { backgroundColor: DARK_THEME_COLOR } : { backgroundColor: LIGHT_THEME_COLOR }}
         handleIndicatorStyle={isDarkMode ? { backgroundColor: 'white' } : { backgroundColor: 'black'}}
-        style={isDarkMode ? { borderWidth: 1, borderColor: 'black', borderRadius: 16 } : {}}
+        style={isDarkMode ? { borderWidth: 1, borderColor: 'black', borderRadius: 17 } : {}}
       >
           {/* TODO: Figure out how to pass isDarkMode without getting type error */}
-          {currMarkerType?.type === 'cctv' ? <CctvDetail id={currMarkerType?.marker.id} cctv={currMarkerType?.marker.cctv} /*isDarkMode={isDarkMode}*//>
-          : currMarkerType?.type === 'lcsFull' ? <LcsDetail id={currMarkerType?.marker.id} lcs={currMarkerType?.marker.lcs} /*isDarkMode={isDarkMode}*//>
-          : currMarkerType?.type === 'lcsOther' ? <LcsDetail id={currMarkerType?.marker.id} lcs={currMarkerType?.marker.lcs} /*isDarkMode={isDarkMode}*//>
-          : currMarkerType?.type === 'cc' ? <CcDetail id={currMarkerType?.marker.id} cc={currMarkerType?.marker.cc} /*isDarkMode={isDarkMode}*//>
-          : currMarkerType?.type === 'chpInc' ? <ChpDetail log={currMarkerType?.marker.center[0].dispatch[0].log} /*isDarkMode={isDarkMode}*//>
+          {currMarkerType?.type === 'cctv' ? <CctvDetail id={currMarkerType?.marker.id} cctv={currMarkerType?.marker.cctv} />
+          : currMarkerType?.type === 'lcsFull' ? <LcsDetail id={currMarkerType?.marker.id} lcs={currMarkerType?.marker.lcs} mapRef={mapRef} setEndLocation={setEndLocation} endLocation={endLocation} />
+          : currMarkerType?.type === 'lcsOther' ? <LcsDetail id={currMarkerType?.marker.id} lcs={currMarkerType?.marker.lcs} mapRef={mapRef} setEndLocation={setEndLocation} endLocation={endLocation} />
+          : currMarkerType?.type === 'cc' ? <CcDetail id={currMarkerType?.marker.id} cc={currMarkerType?.marker.cc} />
+          : currMarkerType?.type === 'chpInc' ? <ChpDetail log={currMarkerType?.marker.center[0].dispatch[0].log} />
           : <Text>No Data Available</Text>
           }
           

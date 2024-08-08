@@ -1,3 +1,4 @@
+import MapView from "react-native-map-clustering";
 // Specifying the layout of the cctv data for type checking
 export type CCTV = {
   id: number;
@@ -144,6 +145,9 @@ export type LCS = {
       };
     };
   };
+  mapRef: React.RefObject<MapView>; // Define mapRef type
+  setEndLocation: (location: { latitude: number; longitude: number }) => void; // Define setEndLocation type
+  endLocation: { latitude: number; longitude: number } | null;
 };
 
 export type CC = {

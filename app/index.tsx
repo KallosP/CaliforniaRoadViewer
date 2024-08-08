@@ -31,6 +31,8 @@ async function fetchAllData(urlType: string, urlArr: string[]) {
 
 // NOTE: don't rely on default component styles, will look different for every platform,
 //       ALWAYS make custom styles for otherwise default components (e.g. buttons)
+
+let renderCtr = 0;
 export default function HomeScreen() {
 
   // CCTVs
@@ -47,7 +49,6 @@ export default function HomeScreen() {
   /*
     TODO: 
 
-          - Dark theme 
           - Apple Dev Creation
 
           - Organize details page data to be more readable for all types of data
@@ -237,6 +238,8 @@ const transformToCHPArray = (data: any): CHP[] => {
     return logs;
   };
 
+
+ // console.log(++renderCtr)
 
   return (
     <ThemeProvider>
