@@ -62,6 +62,7 @@ export default function HomeScreen() {
           - Custom Compass?? (currently just disabled)
           - Cctv video player styling/ or just hide it, allow for maximizing video?
           - Optimization (need to fix this)
+          - Change dark mode marker ellipse background colors to match google maps dark color
           - Apple Dev Creation
 */
 
