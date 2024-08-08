@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, TextInput, StyleSheet, ActivityIndicator } from 'react-native';
+import { Appearance, useColorScheme, View, TextInput, StyleSheet, ActivityIndicator } from 'react-native';
 import { MemoizeMapView } from './custom-components/memo-map';
 import { CCTV, LCS, CC, CHP } from './custom-types/url-types';
 import { ThemeProvider, useTheme } from './custom-components/theme-context';
